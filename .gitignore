@@ -129,6 +129,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+google_gemini_comp
 
 # Spyder project settings
 .spyderproject
