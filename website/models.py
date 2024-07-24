@@ -7,23 +7,23 @@ from . import db
 # deocamdata sunt separate pt security
 # mai trebuie oricum sa faca inheritence de la ceva din sqlalchemy ca sa le putem folosi la login
 
-class Admin(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(30), nullable = False)
-    email = db.Column(db.String(50), unique = True, nullable = False) 
-    dummy_passord = db.Column(db.String(30), nullable = False)
-    _password = db.Column("password", nullable = False)
-
-    @property
-    def password(self) -> str:
-        return self._password
-
-    @password.setter
-    def password(self, plaitext_password: str) -> None:
-        self._password = generate_password_hash(plaitext_password)
-
-    def check_password(self, plaintext_password: str) -> bool:
-        return check_password_hash(self._password, plaintext_password)
+#class Admin(db.Model):
+#    id = db.Column(db.Integer, primary_key=True)
+#    username = db.Column(db.String(30), nullable = False)
+#    email = db.Column(db.String(50), unique = True, nullable = False) 
+#    dummy_passord = db.Column(db.String(30), nullable = False)
+#    _password = db.Column("password", nullable = False)
+#
+#    @property
+#    def password(self) -> str:
+#        return self._password
+#
+#    @password.setter
+#    def password(self, plaitext_password: str) -> None:
+#        self._password = generate_password_hash(plaitext_password)
+#
+#    def check_password(self, plaintext_password: str) -> bool:
+#        return check_password_hash(self._password, plaintext_password)
 
 
 
@@ -52,11 +52,11 @@ class Land():
     third_pointt : str
     fourh_pointt : str
 
-    def get_point_array(self) -> list[str]:
-        pass
+    # def get_point_array(self) -> list[str]:
+    #     pass
 
-    def get_area_surface(self) -> int:
-        pass
+    # def get_area_surface(self) -> int:
+    #     pass
 
 
 class Result():
