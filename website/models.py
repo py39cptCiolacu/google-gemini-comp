@@ -1,49 +1,24 @@
 from __future__ import annotations
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date
+from flask_login import UserMixin
 from . import db
 
 # Admin si User cred ca pot fi acealsi clasa si sa folosim inheritance sau composition
 # deocamdata sunt separate pt security
 # mai trebuie oricum sa faca inheritence de la ceva din sqlalchemy ca sa le putem folosi la login
 
-#class Admin(db.Model):
+# class Admin(db.Model):
 #    id = db.Column(db.Integer, primary_key=True)
 #    username = db.Column(db.String(30), nullable = False)
 #    email = db.Column(db.String(50), unique = True, nullable = False) 
-#    dummy_passord = db.Column(db.String(30), nullable = False)
-#    _password = db.Column("password", nullable = False)
-#
-#    @property
-#    def password(self) -> str:
-#        return self._password
-#
-#    @password.setter
-#    def password(self, plaitext_password: str) -> None:
-#        self._password = generate_password_hash(plaitext_password)
-#
-#    def check_password(self, plaintext_password: str) -> bool:
-#        return check_password_hash(self._password, plaintext_password)
+#    password = db.Column("password", nullable = False)
 
 
-
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), nullable = False)
     email = db.Column(db.String(50), unique = True, nullable = False) 
-    dummy_passord = db.Column(db.String(30), nullable = False)
-    _password = db.Column("password", nullable = False)
-
-    @property
-    def password(self) -> str:
-        return self._password
-
-    @password.setter
-    def password(self, plaitext_password: str) -> None:
-        self._password = generate_password_hash(plaitext_password)
-
-    def check_password(self, plaintext_password: str) -> bool:
-        return check_password_hash(self._password, plaintext_password)
+    password = db.Column(db.String(30), nullable = False)
 
 
 class Land():
