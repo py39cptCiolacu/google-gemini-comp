@@ -13,27 +13,36 @@ class User(db.Model, UserMixin):
 
 
 class Land():
-    first_point : str # cred ca nu le vom stoca ca str
-    second_point : str
-    third_point : str
-    fourth_point : str
+    first_point : list[float]
+    second_point : list[float]
+    third_point : list[float]
+    fourth_point : list[float]
 
-    def get_point_array(self) -> list:
-        x1, y1 = map(float, self.first_point.split(", "))
-        x2, y2 = map(float, self.second_point.split(", "))
-        x3, y3 = map(float, self.third_point.split(", "))
-        x4, y4 = map(float, self.fourth_point.split(", "))
+    def __init__(self, coords: list[list[float]]):
+        self.first_point = coords[0]
+        self.second_point = coords[1]
+        self.third_point = coords[2]
+        self.fourth_point = coords[3]
+    
+    def _sort_points(self) -> list[list[float]]:
+        coordinates = [self.first_point, self.second_point, self.third_point, self.fourth_point]
+        centroid = np.mean(coordinates, axis = 0)
 
-        coordinates = [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
-        return coordinates
+        def angle_from_centroid(point):
+            return np.arctan2(point[1] - centroid[1], point[0] - centroid[0])
+        
+        sorted_points = sorted(coordinates, key=angle_from_centroid)
+        [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] = sorted_points
+    
+        return [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
 
-    def get_area_surface(self) -> int:
-        coordinates = self.get_point_array()
+    def get_area_surface(self) -> float:
+        coordinates = self._sort_points()
         [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] = coordinates #nu stiu daca e legal ce am facut dar nu aveam alta idee pe moment
         #shoelace formula
         sum1 = x1 * y2 + x2 * y3 + x3 * y4 + x4 * y1
         sum2 = y1 * x2 + y2 * x3 + y3 * x4 + y4 * x1
-        return (abs(sum1 - sum2) / 2)
+        return round((abs(sum1 - sum2) / 2), 2)
 
     #info: un json cu 2-3 chestii random
 
