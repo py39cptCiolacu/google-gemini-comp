@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_cors import CORS
 from os import path
 
 db = SQLAlchemy()
@@ -13,6 +14,7 @@ def create_app() -> Flask:
     app.config["SECRET_KEY"] = "a random string"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     db.init_app(app)
+    CORS(app)
 
     from .views import views
     from .auth import auth

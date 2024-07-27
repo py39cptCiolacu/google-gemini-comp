@@ -11,25 +11,22 @@ from .auth_helpers import is_valid_user, ValidateLogin
 auth = Blueprint("auth", __name__)
 
 
-@auth.route("/login", methods = ["GET", "POST"])
+@auth.route("/api/v1/login", methods = ["GET", "POST"])
 def login():
 
-    if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
+    data = request.json
+    email = data.get("username")
+    password = data.get("password")
 
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            flash("The email address is not associated with any user account", category="error")
+    user = User.query.filer_by(email=email).first()
 
-        if not check_password_hash(user.password, password):
-            flash("Incorrect password", category="error")
-        else:
-            flash("Login succesfully", category="succes")
-            login_user(user, remember=True)
-            return redirect(url_for("views.home"))
-
-    return render_template("login.html", user=current_user)
+    if not user:
+        return jsonify({"message" : "No such user"}), 401
+    elif not check_password_hash(user.password, password):
+        return jsonify({"message": "The passoword is incorect"}), 401
+    else:
+        return jsonify({"message": "Login succesful!"}), 200
+    
 
 @auth.route("/register", methods = ["GET", "POST"])
 def register() -> str:

@@ -15,11 +15,9 @@ def is_valid_user(user: User | None, username: str, email: str, password: str, p
     if len(email) < 6:
         return ValidateLogin(is_valid=False, flash_message="Email length must be greater than 6 characters")
     
-    
     if len(username) < 6:
         return ValidateLogin(is_valid=False, flash_message="Username length must be grater than 6 characters")
     
-
     if len(password) < 8:
         return ValidateLogin(is_valid=False, flash_message="Password length must be grater then 8 characters")
 
