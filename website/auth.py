@@ -15,10 +15,10 @@ auth = Blueprint("auth", __name__)
 def login():
 
     data = request.json
-    email = data.get("username")
+    email = data.get("email")
     password = data.get("password")
 
-    user = User.query.filer_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
 
     if not user:
         return jsonify({"message" : "No such user"}), 401
@@ -28,38 +28,32 @@ def login():
         return jsonify({"message": "Login succesful!"}), 200
     
 
-@auth.route("/register", methods = ["GET", "POST"])
+@auth.route("/api/v1/register", methods = ["GET", "POST"])
 def register() -> str:
     
-    if request.method == "POST":
-        email = request.form.get("email")
-        username = request.form.get("username")
-        password= request.form.get("password1")
-        password_confirm= request.form.get("password2")
+    data = request.json
+    email = data.get("email")
+    username = data.get("username")
+    password = data.get("password")
+    password_confirm = data.get("passwordConfirm")
 
-        user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
 
-        is_valid = is_valid_user(user=user,
-                                 username=username,
-                                 email=email,
-                                 password=password,
-                                 password_confirm=password_confirm)
+    is_valid = is_valid_user(user, username, email, password, password_confirm)
 
-        if is_valid.is_valid == False:
-            print("here")
-            flash(is_valid.flash_message)
-        else:
-            new_user = User(email=email, username=username, password=generate_password_hash(password))
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(new_user, remember=True)
-            flash("Account created", category="succes")
-            return redirect(url_for("views.home"))
-        
-    return render_template("register.html", user=current_user)
+    if not is_valid.is_valid:
+        return jsonify({"message" : f"{is_valid.flash_message}"}), 401
+    else:
+        new_user = User(email=email, username=username, password=generate_password_hash(password))
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user, remember=True)
+        return jsonify({"message": "Account created"}), 200
+
+   
 
 
-@auth.route("/logout")
+@auth.route("/api/v1/logout")
 @login_required
 def logout():
     login_user()
