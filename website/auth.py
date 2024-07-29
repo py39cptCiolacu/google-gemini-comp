@@ -1,35 +1,48 @@
 from __future__ import annotations
 
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from .models import User
+from .models import User, LogedUser
 from . import db
 from .auth_helpers import is_valid_user, ValidateLogin
 
 auth = Blueprint("auth", __name__)
 
-
-@auth.route("/api/v1/login", methods = ["GET", "POST"])
+@auth.route("/api/v1/login", methods=["POST"])
 def login():
-
     data = request.json
+    print("sall")
+    if not data:
+        print("0")
+        return jsonify({"message": "No input data provided"}), 400
     email = data.get("email")
     password = data.get("password")
-
+    if not email or not password:
+        print("1")
+        return jsonify({"message": "Email and password are required"}), 400
     user = User.query.filter_by(email=email).first()
-
     if not user:
-        return jsonify({"message" : "No such user"}), 401
+        print("2")
+        return jsonify({"message": "No such user"}), 401
     elif not check_password_hash(user.password, password):
-        return jsonify({"message": "The passoword is incorect"}), 401
+        print("3")
+        return jsonify({"message": "The password is incorrect"}), 401
     else:
-        return jsonify({"message": "Login succesful!"}), 200
-    
+        login_user(user, remember=True)
+        
+        print(f"Sunt aici {user.email}")
+        print(current_user)
+        session["user"] = "Daniel"
+
+        worst_workaround_ever(current_user.email)
+
+        return jsonify({"message": "Login successful!"}), 200
+
 
 @auth.route("/api/v1/register", methods = ["GET", "POST"])
-def register() -> str:
+def register():
     
     data = request.json
     email = data.get("email")
@@ -52,8 +65,13 @@ def register() -> str:
 
    
 
-
 @auth.route("/api/v1/logout")
 @login_required
 def logout():
-    login_user()
+    logout_user()
+
+
+def worst_workaround_ever(email: str) -> None:
+    new_loged_used = LogedUser(email=email)
+    db.session.add(new_loged_used)
+    db.session.commit()

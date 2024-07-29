@@ -1,10 +1,14 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link} from 'react-router-dom';
 import './App.css';
 import Login from './Login';
 import Register from './Register';
+import Map from './Map';
+import UserProfile from './UserProfile';
 
 function App() {
+  const [username, setUsername] = useState('');
+
   return (
     <Router>
       <div className="App">
@@ -12,8 +16,10 @@ function App() {
           <Link to="/">Home</Link> | <Link to="/login">Login</Link> | <Link to="/register">Register</Link>
         </nav>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login setUsername={setUsername} />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/user_profile" element={<UserProfile />} />
+          <Route path="/map" element={<Map />} />
           <Route path="/" element={<Home />} />
         </Routes>
       </div>

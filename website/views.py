@@ -1,16 +1,50 @@
 from __future__ import annotations
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
+from flask_login import login_required, current_user, login_user
+
 import folium
+
+from .models import User, LogedUser
 
 views = Blueprint("views", __name__)
 
 points = [] # dc l am initializat pe asta aici? 
 
-@views.route("/")
-def home() -> str:
+# @views.route("/")
+# def home() -> str:
     
-    return render_template("home.html")
+#     return render_template("home.html")
+
+@views.route("/test_loged_user", methods=["GET", "POST"])
+# @login_required
+def test_user_profile():
+    if current_user.is_authenticated:
+        print("e cnv logat")
+        print(f"{current_user.email}")
+    else:
+        print("no user loged")
+
+    return "<h1> salut </h1>"
+
+@views.route("/login_bypass", methods=["GET", "POST"])
+def login_bypass():
+
+    user = User.query.filter_by(email="daniel@test.com").first()
+
+    login_user(user, remember=True)
+
+    return "<h1> all set </h1>"
+
+@views.route("/api/v1/user_profile", methods=["GET"])
+# @login_required
+def user_profile():
+
+    loged_user = LogedUser.query.order_by(LogedUser.id.desc()).first()
+    user = User.query.filter_by(email = loged_user.email).first()
+
+
+    return jsonify({"username": user.username  , "email": user.email}), 200
 
 @views.route("/map")
 def map() -> str:

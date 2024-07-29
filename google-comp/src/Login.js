@@ -1,46 +1,55 @@
 import React, { useState } from 'react';
-import './Login.css'
+import { useNavigate } from 'react-router-dom';
+import './Login.css';
 
-function Login() {
+function Login({ setUsername }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage('');
 
-    fetch('http://127.0.0.1:5000/api/v1/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Redirect to the dashboard or another page
-          console.log('Login successful');
-        } else {
-          setError(data.message);
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        setError('An unexpected error occurred.');
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/v1/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        setMessage(data.message);
+        setUsername(email);
+        navigate('/user_profile');
+      } else {
+        setMessage(data.message);
+      }
+    } catch (error) {
+      setMessage('An error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="login-container">
       <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleLogin}>
         <div>
           <label>Email:</label>
           <input
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -49,11 +58,14 @@ function Login() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
-        {error && <p className="error">{error}</p>}
-        <button type="submit">Login</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
+      {message && <p>{message}</p>}
     </div>
   );
 }
