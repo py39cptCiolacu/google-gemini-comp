@@ -1,10 +1,11 @@
 from __future__ import annotations
+from datetime import timedelta
+from os import path
 
-from flask import Flask
+from flask import Flask, request, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_cors import CORS
-from os import path
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -13,8 +14,15 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "a random string"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SESSION_COOKIE_NAME'] = "cookie_name"
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+    app.config['USE_SESSION_FOR_NEXT'] = True
+
+
     db.init_app(app)
-    CORS(app)
+    CORS(app, supports_credentials=True)
 
     from .views import views
     from .auth import auth
