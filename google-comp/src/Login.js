@@ -26,7 +26,8 @@ function Login({ setUsername }) {
       const data = await response.json();
 
       if (response.status === 200) {
-        setMessage(data.message);
+        // Stochează token-ul în localStorage
+        localStorage.setItem('token', data.access_token);
         setUsername(email);
         navigate('/user_profile');
       } else {
