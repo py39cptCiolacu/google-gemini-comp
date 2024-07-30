@@ -10,12 +10,14 @@ function UserProfile() {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
+        const token = localStorage.getItem('token');
+
         const response = await fetch('http://127.0.0.1:5000/api/v1/user_profile', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-          },
-          credentials: 'include', // Include credentials for cross-origin requests
+            'Authorization': `Bearer ${token}`
+          }
         });
 
         if (response.status === 401) {
@@ -23,12 +25,7 @@ function UserProfile() {
           return;
         }
 
-        // Log the raw response text
-        const responseText = await response.text();
-        console.log('Response Text:', responseText);
-
-        // Try to parse the response as JSON
-        const data = JSON.parse(responseText);
+        const data = await response.json();
 
         if (!response.ok) {
           throw new Error(data.message || 'Something went wrong');
@@ -53,8 +50,7 @@ function UserProfile() {
       {userInfo ? (
         <div>
           <h1>User Profile</h1>
-          <p><strong>Username:</strong> {userInfo.username}</p>
-          <p><strong>Email:</strong> {userInfo.email}</p>
+          <p><strong>Logged in as:</strong> {userInfo.logged_in_as}</p>
           <button onClick={() => navigate('/map')} className="map-button">
             Go to Map
           </button>
