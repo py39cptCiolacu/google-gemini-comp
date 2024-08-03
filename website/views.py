@@ -3,7 +3,7 @@ from __future__ import annotations
 from flask import Blueprint, render_template, request, jsonify, session
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from .models import User
+from .models import User, Land
 
 import folium
 
@@ -52,4 +52,18 @@ def get_coordinates() -> dict:
 
     return jsonify(response)
 
+@views.route("/api/v1/analysis", methods=["GET", "POST"])
+@jwt_required()
+def analysis() -> str:
+    data = request.get_json()
+    coords = data.get("points")
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    land = Land(user.id, coords)
 
+    parameters = request.form.getlist("parameters")
+    start_date = request.form.get("start_date")
+    end_date = request.form.get("end_date")
+
+    prompt = f"UserID: {user.id}; LandID: {land.id}; Parameters: {', '.join(parameters)}; Start Date: {start_date}; End Date: {end_date}"
+    return prompt
