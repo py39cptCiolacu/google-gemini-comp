@@ -10,19 +10,23 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(30), nullable = False)
     email = db.Column(db.String(50), unique = True, nullable = False) 
     password = db.Column(db.String(30), nullable = False)
+    lands = db.relationship('Land', back_populates='owner')
 
 
 class Land():
-    first_point : list[float]
-    second_point : list[float]
-    third_point : list[float]
-    fourth_point : list[float]
+    # first_point : list[float]
+    # second_point : list[float]
+    # third_point : list[float]
+    # fourth_point : list[float]
 
-    def __init__(self, coords: list[list[float]]):
-        self.first_point = coords[0]
-        self.second_point = coords[1]
-        self.third_point = coords[2]
-        self.fourth_point = coords[3]
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    owner = db.relationship('User', back_populates='lands')
+    points = db.Column(db.JSON, nullable=False)
+
+    def __init__(self, user_id, coords):
+        self.user_id = user_id
+        self.points = coords
     
     def _sort_points(self) -> list[list[float]]:
         coordinates = [self.first_point, self.second_point, self.third_point, self.fourth_point]
@@ -37,8 +41,7 @@ class Land():
         return [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
 
     def get_area_surface(self) -> float:
-        coordinates = self._sort_points()
-        [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] = coordinates #nu stiu daca e legal ce am facut dar nu aveam alta idee pe moment
+        [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] = self._sort_points() #nu stiu daca e legal ce am facut dar nu aveam alta idee pe moment
         #shoelace formula
         sum1 = x1 * y2 + x2 * y3 + x3 * y4 + x4 * y1
         sum2 = y1 * x2 + y2 * x3 + y3 * x4 + y4 * x1
