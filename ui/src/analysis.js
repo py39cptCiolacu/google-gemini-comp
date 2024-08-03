@@ -31,7 +31,6 @@ const FormComponent = () => {
                 },
             });
             console.log(response.data.message);
-            // Handle the response data as needed
         } catch (error) {
             console.error('There was an error submitting the form!', error);
         }

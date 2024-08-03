@@ -5,6 +5,7 @@ import Login from './Login';
 import Register from './Register';
 import Map from './Map';
 import UserProfile from './UserProfile';
+import Analysis from './analysis'
 
 function App() {
   const [username, setUsername] = useState('');
@@ -37,6 +38,11 @@ function App() {
           <Route path="/map" element={
             <PrivateRoute>
               <Map />
+            </PrivateRoute>
+          } />
+          <Route path="/Analysis" element={
+            <PrivateRoute>
+              <Analysis />
             </PrivateRoute>
           } />
           <Route path="/" element={<Home />} />
