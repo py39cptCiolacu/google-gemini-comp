@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import date
+import numpy as np
 from flask_login import UserMixin
 from . import db
 
@@ -56,7 +57,21 @@ class Land():
         sum1 = x1 * y2 + x2 * y3 + x3 * y4 + x4 * y1
         sum2 = y1 * x2 + y2 * x3 + y3 * x4 + y4 * x1
         return round((abs(sum1 - sum2) / 2), 2)
+    
+    def get_limits(self) -> list[float]:
 
+        coords_as_np = np.array([self.first_point, 
+                                 self.second_point,
+                                 self.third_point,
+                                 self.fourth_point])
+        
+        north = np.max(coords_as_np[:, 0])
+        south = np.min(coords_as_np[:, 0])
+        east = np.max(coords_as_np[:, 1])
+        west = np.min(coords_as_np[:, 1])
+
+        return [north, south, east, west]
+    
     #info: un json cu 2-3 chestii random
 
 
