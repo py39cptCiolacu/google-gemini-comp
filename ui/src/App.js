@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 import './App.css';
-import Login from './Login';
-import Register from './Register';
-import Map from './Map';
-import UserProfile from './UserProfile';
-import Analysis from './analysis'
+import Login from './pages/Login/Login';
+import Register from './pages/Register/Register';
+import Map from './pages/Map/Map';
+import UserProfile from './pages/UserProfile/UserProfile';
+import Analysis from './pages/Analysis/Analysis'
 
+
+import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 function App() {
   const [username, setUsername] = useState('');
 
