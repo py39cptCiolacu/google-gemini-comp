@@ -18,12 +18,6 @@ class User(db.Model, UserMixin):
         self.email = email
         self.password = password
 
-
-class LogedUser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50))
-
- 
 class Land():
     # first_point : list[float]
     # second_point : list[float]
