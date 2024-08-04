@@ -24,7 +24,7 @@ class LogedUser(db.Model):
     email = db.Column(db.String(50))
 
  
-class Land():
+class Land(db.Model):
     # first_point : list[float]
     # second_point : list[float]
     # third_point : list[float]
@@ -41,7 +41,7 @@ class Land():
         self.user_id = user_id
         self.points = coords
     
-    def _sort_points(self) -> list[list[float]]:
+    def sort_points(self) -> list[list[float]]:
         coordinates = [self.first_point, self.second_point, self.third_point, self.fourth_point]
         centroid = np.mean(coordinates, axis = 0)
 
@@ -54,7 +54,7 @@ class Land():
         return [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
 
     def get_area_surface(self) -> float:
-        [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] = self._sort_points() #nu stiu daca e legal ce am facut dar nu aveam alta idee pe moment
+        [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] = self.sort_points() #nu stiu daca e legal ce am facut dar nu aveam alta idee pe moment
         #shoelace formula
         sum1 = x1 * y2 + x2 * y3 + x3 * y4 + x4 * y1
         sum2 = y1 * x2 + y2 * x3 + y3 * x4 + y4 * x1
