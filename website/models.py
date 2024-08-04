@@ -31,11 +31,13 @@ class Land():
     # fourth_point : list[float]
 
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', back_populates='lands')
     points = db.Column(db.JSON, nullable=False)
 
-    def __init__(self, user_id, coords):
+    def __init__(self, name, user_id, coords):
+        self.name = name
         self.user_id = user_id
         self.points = coords
     
