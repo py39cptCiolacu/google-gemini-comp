@@ -18,18 +18,15 @@ class User(db.Model, UserMixin):
         self.email = email
         self.password = password
 
-class Land():
-    # first_point : list[float]
-    # second_point : list[float]
-    # third_point : list[float]
-    # fourth_point : list[float]
-
+class Land(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Column)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', back_populates='lands')
     points = db.Column(db.JSON, nullable=False)
 
-    def __init__(self, user_id, coords):
+    def __init__(self, name, user_id, coords):
+        self.name = name
         self.user_id = user_id
         self.points = coords
     
