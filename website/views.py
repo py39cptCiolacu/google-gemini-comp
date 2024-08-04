@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from .models import User, Land
 
 import folium
-
+from copernicus_api.test_fetch import test_fetch
 
 views = Blueprint("views", __name__)
 
@@ -67,3 +67,11 @@ def analysis() -> str:
 
     prompt = f"UserID: {user.id}; LandID: {land.id}; Parameters: {', '.join(parameters)}; Start Date: {start_date}; End Date: {end_date}"
     return prompt
+
+
+@views.route("/test")
+def test():
+
+    test_fetch()
+
+    return "<h1> ALL GOOD </h1"

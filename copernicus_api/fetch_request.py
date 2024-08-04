@@ -1,6 +1,6 @@
 import cdsapi
 from website.models import User, Land
-from nc_to_json import nc_to_json_convertor
+from .nc_to_json import nc_to_json_convertor
 from datetime import datetime
 
 c = cdsapi.Client()
@@ -65,7 +65,7 @@ def get_cdsapi_infos(dict_infos: dict) -> None:
     currrent_user = User.query.filter_by(id=dict_infos["user"]).first()
     current_land = Land.query.filter_by(id=dict_infos["land"]).first()
     now = datetime.now()
-    file_name = currrent_user.usernamme + "_" + current_land.name + "_" + now.strftime("%Y_%m_%d_%H_%M_%S")
+    file_name = currrent_user.username + "_" + current_land.name + "_" + now.strftime("%Y_%m_%d_%H_%M_%S")
 
     c.retrieve(
         "reanalysis-era5-single-levels",  # Dataset-ul pe care vrei să-l accesezi
@@ -75,10 +75,9 @@ def get_cdsapi_infos(dict_infos: dict) -> None:
             "year": checked_infos["year"],
             "month": checked_infos["month"],
             "day": checked_infos["day"],
-            "time": ["00:00", "01:00", "02:00","03:00","04:00","05:00","06:00","07:00","08:00",
-                     "09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00",
-                     "18:00","19:00","20:00","21:00","22:00","23:00","24:00"],
-            'area': checked_infos["day"],
+            "time": ["00:00", "04:00", "08:00",
+                     "12:00", "16:00","17:00", "20:00"],
+            'area': current_land.get_limits(),
             'format': 'netcdf'
         },
         f"{file_name}.nc")  # Numele fișierului în care vor fi salvate datele
@@ -87,9 +86,5 @@ def get_cdsapi_infos(dict_infos: dict) -> None:
     # arrange_data(file_name)
     
     print("All good")
-
-
-def test_fetch() -> None:
-    pass
     
 

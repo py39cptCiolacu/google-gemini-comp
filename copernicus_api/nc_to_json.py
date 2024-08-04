@@ -26,6 +26,6 @@ def nc_to_json_convertor(nc_file_name: str) -> None:
         json.dump(data_dict, json_file, indent=4)
 
 
-    os.remove(f"{nc_file_name}.nc")
+    # os.remove(f"{nc_file_name}.nc")
 
     print("Conversia a fost realizată cu succes!")
