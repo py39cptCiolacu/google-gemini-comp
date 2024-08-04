@@ -19,19 +19,14 @@ class User(db.Model, UserMixin):
         self.password = password
 
 
-class LogedUser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50))
-
- 
 class Land(db.Model):
     # first_point : list[float]
     # second_point : list[float]
     # third_point : list[float]
     # fourth_point : list[float]
-
+    
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.Column)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', back_populates='lands')
     points = db.Column(db.JSON, nullable=False)
