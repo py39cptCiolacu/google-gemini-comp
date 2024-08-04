@@ -27,7 +27,6 @@ function App() {
       <div className="App">
         <nav>
           <Link to="/">Home</Link> | <Link to="/login">Login</Link> | <Link to="/register">Register</Link>
-          {username && <span> | Welcome, {username}</span>}
         </nav>
         <Routes>
           <Route path="/login" element={<Login setUsername={setUsername} />} />
