@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from flask import Blueprint, request, jsonify, session
-from flask_jwt_extended import create_access_token, unset_jwt_cookies
+from flask_jwt_extended import create_access_token, unset_jwt_cookies, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from .models import User
@@ -52,11 +52,14 @@ def register():
         new_user = User(email=email, username=username, password=generate_password_hash(password))
         db.session.add(new_user)
         db.session.commit()
+        access_token = create_access_token(identity=email)
+        response = jsonify({"access_token":access_token})
         return jsonify({"message": "Account created"}), 200
 
    
 
 @auth.route("/api/v1/logout")
+@jwt_required()
 def logout():
     response = jsonify({"message": "logout succesful"})
     unset_jwt_cookies(response)    

@@ -31,9 +31,12 @@ class Land(db.Model):
     x4 = db.Column(db.Float)
     y4 = db.Column(db.Float)
     name = db.Column(db.String(100))
+class Land(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    points = db.Column(db.JSON, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', back_populates='lands')
-    # points = db.Column(db.JSONs)
+    points = db.Column(db.JSON, nullable=False)
 
     def __init__(self, name, user_id, x1, y1, x2, y2, x3, y3, x4, y4):
         self.name = name
