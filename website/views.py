@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, jsonify, session
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from .models import User, Land
+from website import db
 
 import folium
 from copernicus_api.test_fetch import test_fetch
@@ -12,15 +13,24 @@ views = Blueprint("views", __name__)
 
 points = [] # dc l am initializat pe asta aici? 
 
-@views.route("/api/v1/user_profile", methods=["GET"])
+@views.route('/api/v1/user_profile', methods=['GET'])
 @jwt_required()
-def user_profile():
+def get_user_profile():
     current_user = get_jwt_identity()
-    print(current_user)
     user = User.query.filter_by(email=current_user).first()
-    if user:
-        return jsonify(logged_in_as=current_user, email=user.email, username=user.username), 200
-    return jsonify(message="User not found"), 404
+    if user is None:
+        return jsonify({"message": "User not found"}), 404
+    
+    print(len(user.lands))
+    print(user.id)
+
+    user_profile = {
+        "username": user.username,
+        "email": user.email,
+        "number_of_lands": len(user.lands),
+        "lands" : [{'id': land.id, 'name':land.name, 'size': land.get_area_surface()} for land in user.lands]  
+    }
+    return jsonify(user_profile), 200
 
 @views.route("/map")
 def map() -> str:
@@ -75,3 +85,17 @@ def test():
     test_fetch()
 
     return "<h1> ALL GOOD </h1"
+
+
+@views.route("/add_lands")
+def add_lands():
+
+    new_land_1 = Land("Land 1", 1, 12, 12, 44, 44, 55, 55, 66, 66)
+    new_land_2 = Land("Land 2", 1, 13, 13, 23, 12, 12, 23, 12, 34)
+
+    db.session.add(new_land_1)
+    db.session.add(new_land_2)
+
+    db.session.commit()
+
+    return "ALL GOOD"
