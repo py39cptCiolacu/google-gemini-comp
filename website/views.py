@@ -7,7 +7,7 @@ from .models import User, Land
 from website import db
 
 import folium
-
+from copernicus_api.test_fetch import test_fetch
 
 views = Blueprint("views", __name__)
 
@@ -104,3 +104,10 @@ def add_land():
     db.session.commit()
 
     return "<h1> ADDED </h1>"
+
+@views.route("/test")
+def test():
+
+    test_fetch()
+
+    return "<h1> ALL GOOD </h1"
