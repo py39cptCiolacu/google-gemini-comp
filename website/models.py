@@ -18,14 +18,11 @@ class User(db.Model, UserMixin):
         self.email = email
         self.password = password
 
-
- 
 class Land(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    points = db.Column(db.JSON, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', back_populates='lands')
-    points = db.Column(db.JSON, nullable=False)
-    user = db.relationship('User', back_populates='lands')
 
 
     def __init__(self, user_id, coords):

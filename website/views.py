@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, jsonify, session
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from .models import User, Land
+from website import db
 
 import folium
 
@@ -12,15 +13,35 @@ views = Blueprint("views", __name__)
 
 points = [] # dc l am initializat pe asta aici? 
 
-@views.route("/api/v1/user_profile", methods=["GET"])
+# @views.route("/api/v1/user_profile", methods=["GET"])
+# @jwt_required()
+# def user_profile():
+#     current_user = get_jwt_identity()
+#     print(current_user)
+#     user = User.query.filter_by(email=current_user).first()
+#     if user:
+#         return jsonify(logged_in_as=current_user, email=user.email, username=user.username), 200
+#     return jsonify(message="User not found"), 404
+
+@views.route('/api/v1/user_profile', methods=['GET'])
 @jwt_required()
-def user_profile():
+def get_user_profile():
     current_user = get_jwt_identity()
-    print(current_user)
     user = User.query.filter_by(email=current_user).first()
-    if user:
-        return jsonify(logged_in_as=current_user, email=user.email, username=user.username), 200
-    return jsonify(message="User not found"), 404
+    if user is None:
+        return jsonify({"message": "User not found"}), 404
+    
+    print(len(user.lands))
+    print(user.id)
+
+    user_profile = {
+        "username": user.username,
+        "email": user.email,
+        "number_of_lands": len(user.lands),
+        "lands" : [{'id': land.id, 'name':land.points, 'size': land.id} for land in user.lands]  
+    }
+    return jsonify(user_profile), 200
+
 
 @views.route("/map")
 @jwt_required()
@@ -70,3 +91,16 @@ def analysis() -> str:
     prompt = f"UserID: {user.id}; LandID: {land.id}; Parameters: {', '.join(parameters)}; Start Date: {start_date}; End Date: {end_date}"
     return prompt
 
+
+@views.route("/add_land")
+def add_land():
+
+    new_land_1 = Land(1, [1, 2, 3, 4])
+    new_land_2 = Land(1, [1, 2, 3, 5])
+
+    db.session.add(new_land_1)
+    db.session.add(new_land_2)
+
+    db.session.commit()
+
+    return "<h1> ADDED </h1>"
