@@ -23,6 +23,7 @@ def user_profile():
     return jsonify(message="User not found"), 404
 
 @views.route("/map")
+@jwt_required()
 def map() -> str:
 
     start_coords = (0, 0)
@@ -32,6 +33,7 @@ def map() -> str:
 
 
 @views.route("/get_coordinates", methods=["POST"])
+@jwt_required()
 def get_coordinates() -> dict:
 
     global points
@@ -67,3 +69,4 @@ def analysis() -> str:
 
     prompt = f"UserID: {user.id}; LandID: {land.id}; Parameters: {', '.join(parameters)}; Start Date: {start_date}; End Date: {end_date}"
     return prompt
+

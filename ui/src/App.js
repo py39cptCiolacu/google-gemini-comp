@@ -1,36 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './App.css';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
 import Map from './pages/Map/Map';
 import UserProfile from './pages/UserProfile/UserProfile';
-import Analysis from './pages/Analysis/Analysis'
+import Analysis from './pages/Analysis/Analysis';
+import Logout from './pages/Logout/Logout';
 
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import LandingPage from './components/LandingPage';
 
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
+
 function App() {
   const [username, setUsername] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
 
   // Verificăm dacă există un token în localStorage și actualizăm starea
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Poti decoda token-ul JWT pentru a obține informațiile despre utilizator
-      // În acest exemplu simplu, presupunem că utilizatorul este autentificat dacă există un token
-      setUsername('Authenticated User'); // Într-un caz real, ar trebui să obții username-ul din token
+      setUsername('Authenticated User'); // Într-un caz real, obține username-ul din token
+      setIsAuthenticated(true);
+    } else {
+      setUsername('');
+      setIsAuthenticated(false);
     }
   }, []);
 
   return (
     <Router>
       <div className="App">
-        <nav>
-          <Link to="/">Home</Link> | <Link to="/login">Login</Link> | <Link to="/register">Register</Link>
-        </nav>
+        <Navbar isAuthenticated={isAuthenticated} username={username} />
         <Routes>
-          <Route path="/login" element={<Login setUsername={setUsername} />} />
+          <Route path="/login" element={<Login setUsername={setUsername} setIsAuthenticated={setIsAuthenticated} />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
+          
           <Route path="/user_profile" element={
             <PrivateRoute>
               <UserProfile />
@@ -41,13 +49,18 @@ function App() {
               <Map />
             </PrivateRoute>
           } />
-          <Route path="/Analysis" element={
+          <Route path="/analysis" element={
             <PrivateRoute>
               <Analysis />
             </PrivateRoute>
           } />
-          <Route path="/" element={<Home />} />
+          <Route path="/logout" element={
+            <PrivateRoute>
+              <Logout setIsAuthenticated={setIsAuthenticated} setUsername={setUsername} />
+            </PrivateRoute>
+          } />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );
@@ -62,9 +75,7 @@ function PrivateRoute({ children }) {
 function Home() {
   return (
     <div>
-      <h2>Home Page</h2>
-      <Link to="/login">Go to Login</Link><br />
-      <Link to="/register">Go to Register</Link>
+      <LandingPage />
     </div>
   );
 }

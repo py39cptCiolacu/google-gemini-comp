@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const FormComponent = () => {
     const [parameters, setParameters] = useState([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+        }
+    }, [navigate]);
 
     const handleCheckboxChange = (event) => {
         const { value, checked } = event.target;
@@ -25,9 +34,11 @@ const FormComponent = () => {
         };
 
         try {
+            const token = localStorage.getItem('token');
             const response = await axios.post('http://127.0.0.1:5000/analysis', data, {
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
             console.log(response.data.message);
