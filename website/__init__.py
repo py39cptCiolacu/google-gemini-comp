@@ -24,7 +24,7 @@ def create_app() -> Flask:
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     app.config['USE_SESSION_FOR_NEXT'] = True
     app.config["JWT_SECRET_KEY"] = "some random string"
-    app.config["JWT_ACESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
     db.init_app(app)
     CORS(app, supports_credentials=True)
@@ -36,7 +36,7 @@ def create_app() -> Flask:
     app.register_blueprint(auth, url_prefix='/')
 
     @app.after_request
-    def regresh_expiring_jwts(response):
+    def reresh_expiring_jwts(response):
         try:
             exp_timestamp = get_jwt()["exp"]
             now = datetime.now(timezone.utc)
