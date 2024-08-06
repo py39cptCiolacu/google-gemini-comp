@@ -1,13 +1,14 @@
 import React from 'react';
 import { MDBNavbar, MDBContainer, MDBNavbarBrand, MDBNavbarNav, MDBNavbarItem, MDBNavbarLink, MDBNavbarToggler, MDBIcon, MDBCollapse } from 'mdb-react-ui-kit';
+import './Navbar.css'
 
 export default function Navbar({ isAuthenticated, username, setIsAuthenticated, setUsername }) {
   const [showNav, setShowNav] = React.useState(false);
 
   return (
-    <MDBNavbar expand='lg' light bgColor='light'>
+    <MDBNavbar expand='lg' light className='custom-navbar'>
       <MDBContainer fluid>
-        <MDBNavbarBrand href='#'>FieldMaster</MDBNavbarBrand>
+        <MDBNavbarBrand href='/'>FieldMaster</MDBNavbarBrand>
         <MDBNavbarToggler
           type='button'
           data-target='#navbarToggleExternalContent'
@@ -20,39 +21,42 @@ export default function Navbar({ isAuthenticated, username, setIsAuthenticated, 
         </MDBNavbarToggler>
         <MDBCollapse navbar show={showNav}>
           <MDBNavbarNav right fullWidth={false} className='mb-2 mb-lg-0'>
-            <MDBNavbarItem>
-              <MDBNavbarLink href='/'>Home</MDBNavbarLink>
+            <MDBNavbarItem className='custom-nav-link'>
+              <MDBNavbarLink href='/' style={{color:'white'}}>Home</MDBNavbarLink>
             </MDBNavbarItem>
             {isAuthenticated ? (
               <>
-                <MDBNavbarItem>
-                  <MDBNavbarLink href='/user_profile'>User Profile</MDBNavbarLink>
+                <MDBNavbarItem className='custom-nav-link'>
+                  <MDBNavbarLink href='/user_profile' style={{color:'white'}}>User Profile</MDBNavbarLink>
                 </MDBNavbarItem>
-                <MDBNavbarItem>
-                  <MDBNavbarLink href='/map'>Add Land</MDBNavbarLink>
+                <MDBNavbarItem className='custom-nav-link'> 
+                  <MDBNavbarLink href='/map' style={{color:'white'}}>Add Land</MDBNavbarLink>
                 </MDBNavbarItem>
-                <MDBNavbarItem>
-                  <MDBNavbarLink href='/analysis'>Get Suggestion</MDBNavbarLink>
+                <MDBNavbarItem className='custom-nav-link'>
+                  <MDBNavbarLink href='/analysis' style={{color:'white'}}>Get Suggestion</MDBNavbarLink>
                 </MDBNavbarItem>
-                <MDBNavbarItem>
-                  <MDBNavbarLink href='/logout'>Log Out</MDBNavbarLink>
+                <MDBNavbarItem className='custom-nav-link'>
+                  <MDBNavbarLink href='/logout' style={{color:'white'}}>Log Out</MDBNavbarLink>
                 </MDBNavbarItem>
               </>
             ) : (
               <>
-                <MDBNavbarItem>
-                  <MDBNavbarLink href='/login'>Login</MDBNavbarLink>
+                <MDBNavbarItem className='custom-nav-link'>
+                  <MDBNavbarLink href='/login' style={{color:'white'}}>Login</MDBNavbarLink>
                 </MDBNavbarItem>
-                <MDBNavbarItem>
-                  <MDBNavbarLink href='/register'>Register</MDBNavbarLink>
+                <MDBNavbarItem className='custom-nav-link'>
+                  <MDBNavbarLink href='/register' style={{color:'white'}} >Register</MDBNavbarLink>
                 </MDBNavbarItem>
               </>
             )}
-            <MDBNavbarItem className='ms-auto'>
-              <span className='navbar-text'>{isAuthenticated ? 'User' : 'None'}</span>
-            </MDBNavbarItem>
-          </MDBNavbarNav>
+            </MDBNavbarNav>
         </MDBCollapse>
+
+            <div className='d-flex ms-auto align-items-center'>
+                <span className='navbar-text' style={{color:'white'}}>{isAuthenticated ? 'daniel' : 'Guest'}</span>
+            </div>
+
+
       </MDBContainer>
     </MDBNavbar>
   );

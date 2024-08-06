@@ -49,8 +49,8 @@ function UserProfile() {
   }
 
   return (
-    <div className="gradient-custom-2">
-      <MDBContainer className="py-5 h-100">
+    <div className="gradient-custom-2" style={{paddingTop: '20px'}}>
+      <MDBContainer className="py-5 h-100 w-10">
         <MDBRow className="justify-content-center align-items-center h-100">
           <MDBCol lg="9" xl="7">
             <MDBCard>
@@ -88,42 +88,59 @@ function UserProfile() {
                 </div>
               </div>
               <MDBCardBody className="text-black p-4">
-                <div className="mb-5">
-                  <p className="lead fw-normal mb-1">Functionalities</p>
-                    <div className="d-flex flex-column align-items-center" style={{ backgroundColor: '#f8f9fa' }}>
-                      <MDBBtn className="d-block mb-3" style={{ backgroundColor: 'green' }}>Add Land</MDBBtn>
-                      <MDBBtn className="d-block" style={{ backgroundColor: 'green' }}>Get analysis</MDBBtn>
-                  </div>
-                </div>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <MDBCardText className="lead fw-normal mb-0">Lands</MDBCardText>
-                </div>
-                <MDBTable>
-                  <MDBTableHead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Size</th>
-                    </tr>
-                  </MDBTableHead>
-                  <MDBTableBody>
-                      {userInfo && userInfo.lands.length > 0 ? (
-                      userInfo.lands.map((land) => (
-                        <tr key={land.id}>
-                          <td>{land.id}</td>
-                          <td>{land.name}</td>
-                          <td>{land.size}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="3">No lands available</td>
-                      </tr>
-                    )}
-                    {/* Aici poți adăuga rânduri pentru a afișa datele despre terenuri */}
-                  </MDBTableBody>
-                </MDBTable>
-              </MDBCardBody>
+  <div className="mb-5">
+    <p className="lead fw-normal mb-1" style={{paddingBottom: '20px'}}>Functionalities</p>
+    <div className="row">
+      {/* Columna cu butoane */}
+      <div className="col-md-6 d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
+        <div className="d-flex flex-column align-items-center">
+          <MDBBtn className="mb-3" style={{ backgroundColor: '#00b300', width: '150px' }}>Add Land</MDBBtn>
+          <MDBBtn className="mb-3" style={{ backgroundColor: '#00b300', width: '150px' }}>Get Analysis</MDBBtn>
+          <MDBBtn style={{ backgroundColor: '#00b300', width: '150px' }}>Edit profile</MDBBtn>
+        </div>
+      </div>
+
+      {/* Columna cu text */}
+      <div className="col-md-6">
+        <div className="border rounded p-3" style={{ backgroundColor: '#f8f9fa' }}>
+          <h5 className="fw-bold text-center mb-2">Your last suggestion</h5>
+          <p className="text-muted mb-0" style={{ fontSize: '0.875rem', textAlign: 'justify' }}>
+            Here you can find functionalities to manage your lands. Use the buttons on the left to add new lands, get analysis, or perform other actions. Make sure to explore all available options to fully utilize the platform.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div className="d-flex justify-content-between align-items-center mb-4">
+    <MDBCardText className="lead fw-normal mb-0">Lands</MDBCardText>
+  </div>
+  <MDBTable>
+    <MDBTableHead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Size</th>
+      </tr>
+    </MDBTableHead>
+    <MDBTableBody>
+      {userInfo && userInfo.lands.length > 0 ? (
+        userInfo.lands.map((land) => (
+          <tr key={land.id}>
+            <td>{land.id}</td>
+            <td>{land.name}</td>
+            <td>{land.size}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="3">No lands available</td>
+        </tr>
+      )}
+    </MDBTableBody>
+  </MDBTable>
+</MDBCardBody>
+
+
             </MDBCard>
           </MDBCol>
         </MDBRow>

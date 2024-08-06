@@ -12,6 +12,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LandingPage from './components/LandingPage';
 
+
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      setUsername('Authenticated User'); // Într-un caz real, obține username-ul din token
+      setUsername(username)// Într-un caz real, obține username-ul din token
       setIsAuthenticated(true);
     } else {
       setUsername('');
