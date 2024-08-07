@@ -8,7 +8,6 @@ from website import db
 from website import db
 
 import folium
-from copernicus_api.test_fetch import test_fetch, test_convertor, process_json
 
 views = Blueprint("views", __name__)
 
@@ -43,18 +42,46 @@ def get_user_profile():
     }
     return jsonify(user_profile), 200
 
-@views.route("/map")
+@views.route("/api/v1/add_land", methods=["POST"])
 @jwt_required()
-def map() -> str:
+def add_land():
 
-    start_coords = (0, 0)
-    folium_map= folium.Map(location=start_coords, zoom_start=2)
+    current_user_jwt = get_jwt_identity()
+    current_user = User.query.filter_by(email=current_user_jwt).first()
 
-    return render_template("map.html", foium_map = folium_map._repr_html_())
+    data = request.json
+    points = data.get("points", [])
+    name = data.get("name")
+
+    if len(points) != 4:
+        return jsonify({'error' : 'You must provide exactly 4 points'}), 400
+    
+    print(points)
+    print(name)
+    new_land = Land(name = name, user_id=current_user.id,
+                    x1=points[0][0],
+                                 y1=points[0][1],
+                                 x2=points[1][0],
+                                 y2=points[1][1],
+                                 x3=points[2][0],
+                                 y3=points[2][1],
+                                 x4=points[3][0],
+                                 y4=points[3][1])
+
+    surface = new_land.get_area_surface()
+    print(surface)
+
+    if surface > 3.00:
+        return jsonify({'message': 'The surface must be smaller then 3'}), 400
+
+    db.session.add(new_land)
+    db.session.commit()
+    return jsonify({'message': 'Land added succesfully'}), 200
 
 
-@views.route("/get_coordinates", methods=["POST"])
-@jwt_required()
+
+@views.route("api/v1/get_coordinates", methods=["POST"])
+# @jwt_required()
 def get_coordinates() -> dict:
 
     global points
@@ -71,7 +98,7 @@ def get_coordinates() -> dict:
         'lng': lng,
         'points': points if len(points) == 4 else []
     }
-    print(response)
+    # print(response)
 
     return jsonify(response)
 
@@ -92,38 +119,38 @@ def analysis() -> str:
     return prompt
 
 
-@views.route("/add_land")
-def add_land():
+# @views.route("/add_land")
+# def add_land():
 
-    new_land_1 = Land(1, [1, 2, 3, 4])
-    new_land_2 = Land(1, [1, 2, 3, 5])
+#     new_land_1 = Land(1, [1, 2, 3, 4])
+#     new_land_2 = Land(1, [1, 2, 3, 5])
 
-    db.session.add(new_land_1)
-    db.session.add(new_land_2)
+#     db.session.add(new_land_1)
+#     db.session.add(new_land_2)
 
-    db.session.commit()
+#     db.session.commit()
 
-    return "<h1> ADDED </h1>"
+#     return "<h1> ADDED </h1>"
 
-@views.route("/test")
-def test():
+# @views.route("/test")
+# def test():
 
-    # test_fetch()
-    # test_convertor()
-    process_json("test_username_test_land_2024_08_07_00_22_45.json", "results.json")
+#     # test_fetch()
+#     # test_convertor()
+#     process_json("test_username_test_land_2024_08_07_00_22_45.json", "results.json")
 
-    return "<h1> ALL GOOD </h1"
+# #     return "<h1> ALL GOOD </h1"
 
 
-@views.route("/add_lands")
-def add_lands():
+# @views.route("/add_lands")
+# def add_lands():
 
-    new_land_1 = Land("Land 1", 1, 12, 12, 44, 44, 55, 55, 66, 66)
-    new_land_2 = Land("Land 2", 1, 13, 13, 23, 12, 12, 23, 12, 34)
+#     new_land_1 = Land("Land 1", 1, 12, 12, 44, 44, 55, 55, 66, 66)
+#     new_land_2 = Land("Land 2", 1, 13, 13, 23, 12, 12, 23, 12, 34)
 
-    db.session.add(new_land_1)
-    db.session.add(new_land_2)
+#     db.session.add(new_land_1)
+#     db.session.add(new_land_2)
 
-    db.session.commit()
+#     db.session.commit()
 
-    return "ALL GOOD"
+#     return "ALL GOOD"
