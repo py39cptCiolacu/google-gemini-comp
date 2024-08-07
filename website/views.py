@@ -8,7 +8,7 @@ from website import db
 from website import db
 
 import folium
-from copernicus_api.test_fetch import test_fetch
+from copernicus_api.test_fetch import test_fetch, test_convertor, process_json
 
 views = Blueprint("views", __name__)
 
@@ -108,7 +108,9 @@ def add_land():
 @views.route("/test")
 def test():
 
-    test_fetch()
+    # test_fetch()
+    # test_convertor()
+    process_json("test_username_test_land_2024_08_07_00_22_45.json", "results.json")
 
     return "<h1> ALL GOOD </h1"
 

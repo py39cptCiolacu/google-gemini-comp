@@ -1,11 +1,14 @@
 from website.models import User, Land, db
 from .fetch_request import get_cdsapi_infos
+from .nc_to_json import nc_to_json_convertor
+import json
+import numpy as np
 
 def test_fetch() -> None:
 
     test_user = User(
-        username="test_username",
-        email="email@test.com",
+        username="test2_username",
+        email="email2@test.com",
         password="parola_test"
     )
 
@@ -40,5 +43,10 @@ def test_fetch() -> None:
     get_cdsapi_infos(dict_infos)
 
 
+def test_convertor() -> None:
 
+    file_name = "test_username_test_land_2024_08_07_00_22_45"
 
+    nc_to_json_convertor(file_name)
+
+    print("all good")

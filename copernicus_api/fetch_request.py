@@ -1,6 +1,6 @@
 import cdsapi
 from website.models import User, Land
-from .nc_to_json import nc_to_json_convertor
+from .nc_to_json import nc_to_json_convertor, process_json
 from datetime import datetime
 
 c = cdsapi.Client()
@@ -50,10 +50,6 @@ def check_fetch_infos(dict_infos: dict) -> dict | None:
     return dict_infos
 
 
-def arrange_data(data_name: str) -> None:
-    pass
-
-
 def get_cdsapi_infos(dict_infos: dict) -> None:
 
     checked_infos = check_fetch_infos(dict_infos)
@@ -83,8 +79,9 @@ def get_cdsapi_infos(dict_infos: dict) -> None:
         f"{file_name}.nc")  # Numele fișierului în care vor fi salvate datele
     
     nc_to_json_convertor(file_name)
-    # arrange_data(file_name)
+    process_json(input_json=f"{file_name}.json", output_json=f"{file_name}_final.json")
     
+
     print("All good")
     
 
