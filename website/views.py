@@ -103,54 +103,19 @@ def get_coordinates() -> dict:
     return jsonify(response)
 
 @views.route("/api/v1/analysis", methods=["GET", "POST"])
-@jwt_required()
-def analysis() -> str:
-    data = request.get_json()
-    coords = data.get("points")
-    current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).first()
-    land = Land(user.id, coords)
+# @jwt_required()
+def analysis():
+    data = request.json
 
-    parameters = request.form.getlist("parameters")
-    start_date = request.form.get("start_date")
-    end_date = request.form.get("end_date")
+    # Verificăm dacă datele au fost primite corect
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
 
-    prompt = f"UserID: {user.id}; LandID: {land.id}; Parameters: {', '.join(parameters)}; Start Date: {start_date}; End Date: {end_date}"
-    return prompt
+    # Afișăm datele primite
+    print("Received data:", data)
 
-
-# @views.route("/add_land")
-# def add_land():
-
-#     new_land_1 = Land(1, [1, 2, 3, 4])
-#     new_land_2 = Land(1, [1, 2, 3, 5])
-
-#     db.session.add(new_land_1)
-#     db.session.add(new_land_2)
-
-#     db.session.commit()
-
-#     return "<h1> ADDED </h1>"
-
-# @views.route("/test")
-# def test():
-
-#     # test_fetch()
-#     # test_convertor()
-#     process_json("test_username_test_land_2024_08_07_00_22_45.json", "results.json")
-
-# #     return "<h1> ALL GOOD </h1"
-
-
-# @views.route("/add_lands")
-# def add_lands():
-
-#     new_land_1 = Land("Land 1", 1, 12, 12, 44, 44, 55, 55, 66, 66)
-#     new_land_2 = Land("Land 2", 1, 13, 13, 23, 12, 12, 23, 12, 34)
-
-#     db.session.add(new_land_1)
-#     db.session.add(new_land_2)
-
-#     db.session.commit()
-
-#     return "ALL GOOD"
+    # Returnăm datele primite ca răspuns
+    return jsonify({
+        'message': 'Data received successfully',
+        'received_data': data
+    })
