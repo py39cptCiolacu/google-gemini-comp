@@ -101,21 +101,41 @@ def get_coordinates() -> dict:
     # print(response)
 
     return jsonify(response)
-
 @views.route("/api/v1/analysis", methods=["GET", "POST"])
-# @jwt_required()
+@jwt_required()  # Asigură-te că utilizatorul este autentificat
 def analysis():
-    data = request.json
+    current_user_email = get_jwt_identity()  # Obține ID-ul utilizatorului logat
 
-    # Verificăm dacă datele au fost primite corect
-    if not data:
-        return jsonify({'error': 'No data provided'}), 400
+    # Găsim utilizatorul logat după ID
+    user = User.query.filter_by(email=current_user_email).first()
 
-    # Afișăm datele primite
-    print("Received data:", data)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-    # Returnăm datele primite ca răspuns
-    return jsonify({
-        'message': 'Data received successfully',
-        'received_data': data
-    })
+    # Obținem toate terenurile asociate utilizatorului
+    lands = Land.query.filter_by(user_id=user.id).all()
+
+    # Extragem numele terenurilor
+    land_names = [land.name for land in lands]
+
+    if request.method == "POST":
+        data = request.json
+
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        print("Received data:", data)
+        print("Parametrii: ", data["parameters"])
+
+        return jsonify({
+            'message': 'Data received successfully',
+            'received_data': data,
+            'land_names': land_names  # Adăugăm numele terenurilor în răspuns
+        })
+
+    elif request.method == "GET":
+        # Returnăm doar numele terenurilor dacă se face un GET
+        return jsonify({
+            'message': 'Lands retrieved successfully',
+            'land_names': land_names
+        })

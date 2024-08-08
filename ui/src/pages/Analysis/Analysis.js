@@ -25,13 +25,12 @@ const FormComponent = () => {
     const [crops, setCrops] = useState([]);
     const [selectedField, setSelectedField] = useState('');
     const [selectedCrop, setSelectedCrop] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showMessage, setShowMessage] = useState(false);
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // Datele simulate pentru loturi și culturi
-    const fieldsOptions = ['Field 1', 'Field 2', 'Field 3'];
     const cropsOptions = ['Wheat', 'Corn', 'Barley', 'Oats', 'Soybean', 'Rice', 'Canola', 'Cotton'];
-
-    // Parametrii actualizați
     const parameterOptions = [
         'Temperature at 2 meters',
         'Total Precipitation',
@@ -44,13 +43,28 @@ const FormComponent = () => {
     ];
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            navigate('/login');
-        }
+        const fetchFields = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/login');
+                return;
+            }
 
-        setFields(fieldsOptions);
-        setCrops(cropsOptions);
+            try {
+                const response = await axios.get('http://localhost:5000/api/v1/analysis', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                setFields(response.data.land_names); // Setăm numele terenurilor primite de la API
+                setCrops(cropsOptions); // Setăm opțiunile pentru culturi
+            } catch (error) {
+                console.error('There was an error fetching the fields!', error);
+            }
+        };
+
+        fetchFields();
     }, [navigate]);
 
     const handleCheckboxChange = (event) => {
@@ -64,6 +78,29 @@ const FormComponent = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setError('');
+
+        if (!startDate || !endDate) {
+            setError('Please select both start date and end date.');
+            return;
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const differenceInDays = (end - start) / (1000 * 60 * 60 * 24);
+
+        if (end < start) {
+            setError('End date cannot be before start date.');
+            return;
+        }
+
+        if (differenceInDays > 7) {
+            setError('The date range cannot exceed 7 days.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setShowMessage(true);
 
         const data = {
             parameters: parameters,
@@ -84,6 +121,11 @@ const FormComponent = () => {
             console.log(response.data.message);
         } catch (error) {
             console.error('There was an error submitting the form!', error);
+        } finally {
+            setIsSubmitting(false);
+            setTimeout(() => {
+                setShowMessage(false);
+            }, 10000);
         }
     };
 
@@ -155,6 +197,14 @@ const FormComponent = () => {
 
                                 <MDBBtn type="submit" color="primary" className="mt-4">Submit</MDBBtn>
                             </form>
+
+                            {error && (
+                                <p className="mt-3 text-danger text-center">{error}</p>
+                            )}
+
+                            {showMessage && !error && (
+                                <p className="mt-3 text-center">Wait for your response...</p>
+                            )}
                         </MDBCardBody>
                     </MDBCard>
                 </MDBCol>
