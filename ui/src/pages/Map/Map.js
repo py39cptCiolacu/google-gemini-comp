@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { MDBBtn, MDBInput } from 'mdb-react-ui-kit';
 import 'mdb-react-ui-kit/dist/css/mdb.min.css'; // Import MDB CSS
+import { Helmet } from 'react-helmet'; // Import Helmet
 
 // Fix the marker icon issue by using the default Leaflet icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -98,6 +99,9 @@ const MapComponent = () => {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', paddingTop: '70px' }}>
+      <Helmet>
+        <title>Add Land - FieldMaster</title> {/* Set the page title */}
+      </Helmet>
       <div style={{ 
         flex: 1, 
         position: 'relative',

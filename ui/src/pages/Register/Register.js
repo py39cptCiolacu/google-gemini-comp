@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Register.css';
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
 import {
   MDBBtn,
   MDBContainer,
@@ -42,7 +43,11 @@ function Register() {
   };
 
 return (
+  <div style = {{paddingTop: '50px', paddingBottom: '500px'}}>
   <MDBContainer fluid className='p-4'>
+      <Helmet>
+        <title>Register - FieldMaster</title>
+      </Helmet>
     <MDBRow>
       <MDBCol md='6' className='text-center text-md-start d-flex flex-column justify-content-center'>
         <h1 className="my-5 display-3 fw-bold ls-tight px-3">
@@ -117,6 +122,7 @@ return (
       </MDBCol>
     </MDBRow>
   </MDBContainer>
+  </div>
 );
 };
 
