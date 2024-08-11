@@ -173,6 +173,15 @@ def analysis():
         fetch_dict = get_fetch_dict(data)
         get_cdsapi_infos(fetch_dict)
 
+        # print("---------fetch data")
+        # print(fetch_dict)
+        # try:
+        #     get_cdsapi_infos(fetch_dict)
+        # except Exception as e:
+        #     print(str(e))
+        #     if "memory" in str(e):
+        #         print("-------------MEMORY ERROR-----------")
+
         return jsonify({
             'message': 'Data received successfully',
             'received_data': data,
@@ -186,7 +195,7 @@ def analysis():
             'land_names': land_names
         })
     
-@jwt_required
+# @jwt_required
 def get_fetch_dict(data) -> dict:
 
     current_user_email = get_jwt_identity()
@@ -216,13 +225,21 @@ def get_fetch_dict(data) -> dict:
     start_day = data["start_date"][8:10]
     end_day = data["end_date"][8:10]
 
-    int_start_day = int(start_day)
+    int_current_day = int(start_day)
     int_end_day = int(end_day)
 
     days = []
-    while int_start_day <= int_end_day:
-        days.append(str(int_start_day))
-        int_start_day += 1
+    while int_current_day <= int_end_day:
+
+        if int_current_day >=10:
+            days.append(str(int_current_day))
+        else:
+            day_to_append = '0' + str(int_current_day)
+            days.append(day_to_append)
+        
+        int_current_day +=1 
+
+    print(current_land.get_limits())
 
     fetch_dict = {
         "user" : current_user.id,

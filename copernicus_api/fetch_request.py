@@ -28,7 +28,9 @@ def check_fetch_infos(dict_infos: dict) -> dict | None:
     #                     }
     
     must_have_keys = ["user", "land", "parameters", "year", "month", "day", "area"]
-   
+    
+    print(f"-------------------{type(dict_infos)} - {dict_infos}")
+
     for must_key in must_have_keys:
         if must_key not in dict_infos.keys():
             print(f"You are missing {must_key} for the dict")
@@ -63,6 +65,8 @@ def get_cdsapi_infos(dict_infos: dict) -> None:
     now = datetime.now()
     file_name = currrent_user.username + "_" + current_land.name + "_" + now.strftime("%Y_%m_%d_%H_%M_%S")
 
+    print("Aici ajung")
+
     c.retrieve(
         "reanalysis-era5-single-levels",  # Dataset-ul pe care vrei să-l accesezi
         {
@@ -70,7 +74,7 @@ def get_cdsapi_infos(dict_infos: dict) -> None:
             "variable": checked_infos["parameters"],
             "year": checked_infos["year"],
             "month": checked_infos["month"],
-            "day": checked_infos["day"],
+            "day": ["12", "13"],
             "time": ["00:00", "04:00", "08:00",
                      "12:00", "16:00","17:00", "20:00"],
             'area': current_land.get_limits(),

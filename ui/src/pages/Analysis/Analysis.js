@@ -20,7 +20,7 @@ import {
 import { Helmet } from 'react-helmet'; // Import Helmet
 
 
-const FormComponent = () => {
+const Analysis = () => {
     const [parameters, setParameters] = useState([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -137,89 +137,85 @@ const FormComponent = () => {
     };
 
     return (
-        <Helmet>
+        <><></><Helmet>
             <title>Analysis Form - FieldMaster</title> {/* Set the page title */}
-        </Helmet>
-        <MDBContainer style={{ padding: '50px' }} className="my-4">
-            <MDBRow className="justify-content-center">
-                <MDBCol md="8">
-                    <MDBCard>
-                        <MDBCardHeader>
-                            <h4>Select Parameters for Analysis</h4>
-                        </MDBCardHeader>
-                        <MDBCardBody>
-                            <form onSubmit={handleSubmit}>
-                                <h5>Select Parameters</h5>
-                                <MDBRow>
-                                    {parameterOptions.map((param, index) => (
-                                        <MDBCol md="6" key={index}>
-                                            <MDBCheckbox
-                                                id={`checkbox${index}`}
-                                                label={param}
-                                                value={param}
-                                                onChange={handleCheckboxChange}
-                                            />
-                                        </MDBCol>
-                                    ))}
-                                </MDBRow>
-
-                                <h5 className="mt-4">Select Date Range</h5>
-                                <MDBInput
-                                    type="date"
-                                    label="Start Date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                />
-                                <MDBInput
-                                    type="date"
-                                    label="End Date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                />
-
-                                <h5 className="mt-4">Select Field</h5>
-                                <MDBDropdown className="mb-4">
-                                    <MDBDropdownToggle color="secondary">
-                                        {selectedField || 'Select Field'}
-                                    </MDBDropdownToggle>
-                                    <MDBDropdownMenu>
-                                        {fields.map((field, index) => (
-                                            <MDBDropdownItem key={index} onClick={() => setSelectedField(field)}>
-                                                {field}
-                                            </MDBDropdownItem>
+        </Helmet><MDBContainer style={{ padding: '50px' }} className="my-4">
+                <MDBRow className="justify-content-center">
+                    <MDBCol md="8">
+                        <MDBCard>
+                            <MDBCardHeader>
+                                <h4>Select Parameters for Analysis</h4>
+                            </MDBCardHeader>
+                            <MDBCardBody>
+                                <form onSubmit={handleSubmit}>
+                                    <h5>Select Parameters</h5>
+                                    <MDBRow>
+                                        {parameterOptions.map((param, index) => (
+                                            <MDBCol md="6" key={index}>
+                                                <MDBCheckbox
+                                                    id={`checkbox${index}`}
+                                                    label={param}
+                                                    value={param}
+                                                    onChange={handleCheckboxChange} />
+                                            </MDBCol>
                                         ))}
-                                    </MDBDropdownMenu>
-                                </MDBDropdown>
+                                    </MDBRow>
 
-                                <h5 className="mt-4">Select Crop</h5>
-                                <MDBDropdown className="mb-4">
-                                    <MDBDropdownToggle color="secondary">
-                                        {selectedCrop || 'Select Crop'}
-                                    </MDBDropdownToggle>
-                                    <MDBDropdownMenu>
-                                        {crops.map((crop, index) => (
-                                            <MDBDropdownItem key={index} onClick={() => setSelectedCrop(crop)}>
-                                                {crop}
-                                            </MDBDropdownItem>
-                                        ))}
-                                    </MDBDropdownMenu>
-                                </MDBDropdown>
+                                    <h5 className="mt-4">Select Date Range</h5>
+                                    <MDBInput
+                                        type="date"
+                                        label="Start Date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)} />
+                                    <MDBInput
+                                        type="date"
+                                        label="End Date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)} />
 
-                                <MDBBtn type="submit" color="primary" className="mt-4">Submit</MDBBtn>
-                            </form>
+                                    <h5 className="mt-4">Select Field</h5>
+                                    <MDBDropdown className="mb-4">
+                                        <MDBDropdownToggle color="secondary">
+                                            {selectedField || 'Select Field'}
+                                        </MDBDropdownToggle>
+                                        <MDBDropdownMenu>
+                                            {fields.map((field, index) => (
+                                                <MDBDropdownItem key={index} onClick={() => setSelectedField(field)}>
+                                                    {field}
+                                                </MDBDropdownItem>
+                                            ))}
+                                        </MDBDropdownMenu>
+                                    </MDBDropdown>
 
-                            {error && (
-                                <p className="mt-3 text-danger text-center">{error}</p>
-                            )}
+                                    <h5 className="mt-4">Select Crop</h5>
+                                    <MDBDropdown className="mb-4">
+                                        <MDBDropdownToggle color="secondary">
+                                            {selectedCrop || 'Select Crop'}
+                                        </MDBDropdownToggle>
+                                        <MDBDropdownMenu>
+                                            {crops.map((crop, index) => (
+                                                <MDBDropdownItem key={index} onClick={() => setSelectedCrop(crop)}>
+                                                    {crop}
+                                                </MDBDropdownItem>
+                                            ))}
+                                        </MDBDropdownMenu>
+                                    </MDBDropdown>
 
-                            {showMessage && !error && (
-                                <p className="mt-3 text-center">Wait for your response...</p>
-                            )}
-                        </MDBCardBody>
-                    </MDBCard>
-                </MDBCol>
-            </MDBRow>
-        </MDBContainer>
+                                    <MDBBtn type="submit" color="primary" className="mt-4">Submit</MDBBtn>
+                                </form>
+
+                                {error && (
+                                    <p className="mt-3 text-danger text-center">{error}</p>
+                                )}
+
+                                {showMessage && !error && (
+                                    <p className="mt-3 text-center">Wait for your response...</p>
+                                )}
+                            </MDBCardBody>
+                        </MDBCard>
+                    </MDBCol>
+                </MDBRow>
+            </MDBContainer></>
 
     );
 };
