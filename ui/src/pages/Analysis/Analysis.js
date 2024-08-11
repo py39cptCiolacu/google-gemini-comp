@@ -46,6 +46,7 @@ const FormComponent = () => {
     ];
 
     useEffect(() => {
+
         const fetchFields = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -111,17 +112,20 @@ const FormComponent = () => {
             end_date: endDate,
             field: selectedField,
             crop: selectedCrop,
+
         };
 
         try {
             const token = localStorage.getItem('token');
+
             const response = await axios.post('http://localhost:5000/api/v1/analysis', data, {
+
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            console.log(response.data.message);
+            console.log(response.data);
         } catch (error) {
             console.error('There was an error submitting the form!', error);
         } finally {
@@ -216,7 +220,8 @@ const FormComponent = () => {
                 </MDBCol>
             </MDBRow>
         </MDBContainer>
+
     );
 };
 
-export default FormComponent;
+export default Analysis;

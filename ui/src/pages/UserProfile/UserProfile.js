@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import './UserProfile.css';
 import {
   MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, 
-  MDBCardImage, MDBBtn, MDBTypography, MDBTable, MDBTableHead, MDBTableBody
+  MDBCardImage, MDBBtn, MDBTypography, MDBTable, MDBTableHead, MDBTableBody, MDBModal, MDBModalHeader, MDBModalBody, MDBModalFooter
 } from 'mdb-react-ui-kit';
-import { Helmet } from 'react-helmet'; // Import Helmet
+import { Helmet } from 'react-helmet';
 
 function UserProfile() {
-  const [userInfo, setUserInfo] = useState(0);
+  const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false); // State for modal
+  const [newUsername, setNewUsername] = useState('');
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -25,7 +27,7 @@ function UserProfile() {
         });
 
         if (response.status === 401) {
-          navigate('/login'); // Redirect to login if not authenticated
+          navigate('/login');
           return;
         }
 
@@ -36,14 +38,40 @@ function UserProfile() {
         }
 
         setUserInfo(data);
+        setNewUsername(data.username); // Initialize newUsername with current username
       } catch (error) {
-        console.error('Fetch error:', error); // Log the error
+        console.error('Fetch error:', error);
         setError(error.message);
       }
     };
 
     fetchUserInfo();
   }, [navigate]);
+
+  const handleEditProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://127.0.0.1:5000/api/v1/update_username', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newUsername })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update username');
+      }
+
+      const data = await response.json();
+      setUserInfo((prevInfo) => ({ ...prevInfo, username: newUsername }));
+      setModalOpen(false);
+    } catch (error) {
+      console.error('Update error:', error);
+      setError(error.message);
+    }
+  };
 
   if (error) {
     return <div className="user-profile-container"><p>{error}</p></div>;
@@ -52,7 +80,7 @@ function UserProfile() {
   return (
     <div className="gradient-custom-2" style={{paddingTop: '20px'}}>
       <Helmet>
-        <title>User Profile - FieldMaster</title> {/* Set the page title */}
+        <title>User Profile - FieldMaster</title>
       </Helmet>
       <MDBContainer className="py-5 h-100 w-10">
         <MDBRow className="justify-content-center align-items-center h-100">
@@ -82,7 +110,7 @@ function UserProfile() {
               <div className="p-4 text-black" style={{ backgroundColor: '#f8f9fa' }}>
                 <div className="d-flex justify-content-end text-center py-1">
                   <div>
-                    <MDBCardText className="mb-1 h3">{userInfo.number_of_lands}</MDBCardText>
+                    <MDBCardText className="mb-1 h3">{userInfo?.number_of_lands}</MDBCardText>
                     <MDBCardText className="small text-muted mb-0">Lands</MDBCardText>
                   </div>
                   <div className="px-3">
@@ -97,9 +125,9 @@ function UserProfile() {
                   <div className="row">
                     <div className="col-md-6 d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
                       <div className="d-flex flex-column align-items-center">
-                        <MDBBtn className="mb-3" style={{ backgroundColor: '#00b300', width: '150px' }}>Add Land</MDBBtn>
-                        <MDBBtn className="mb-3" style={{ backgroundColor: '#00b300', width: '150px' }}>Get Analysis</MDBBtn>
-                        <MDBBtn style={{ backgroundColor: '#00b300', width: '150px' }}>Edit profile</MDBBtn>
+                        <MDBBtn className="mb-3" style={{ backgroundColor: '#00b300', width: '150px' }} onClick={() => navigate('/map')}>Add Land</MDBBtn>
+                        <MDBBtn className="mb-3" style={{ backgroundColor: '#00b300', width: '150px' }} onClick={() => navigate('/analysis')}>Get Analysis</MDBBtn>
+                        <MDBBtn style={{ backgroundColor: '#00b300', width: '150px' }} onClick={() => setModalOpen(true)}>Edit profile</MDBBtn>
                       </div>
                     </div>
                     <div className="col-md-6">
@@ -144,6 +172,25 @@ function UserProfile() {
           </MDBCol>
         </MDBRow>
       </MDBContainer>
+
+      {/* Modal for editing profile */}
+      <MDBModal show={modalOpen} setShow={setModalOpen} tabIndex='-1'>
+        <MDBModalHeader>Update Username</MDBModalHeader>
+        <MDBModalBody>
+          <div className="form-outline">
+            <input
+              type="text"
+              className="form-control"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+            />
+          </div>
+        </MDBModalBody>
+        <MDBModalFooter>
+          <MDBBtn color="secondary" onClick={() => setModalOpen(false)}>Close</MDBBtn>
+          <MDBBtn onClick={handleEditProfile} style={{ backgroundColor: '#00b300' }}>Save Changes</MDBBtn>
+        </MDBModalFooter>
+      </MDBModal>
     </div>
   );
 }

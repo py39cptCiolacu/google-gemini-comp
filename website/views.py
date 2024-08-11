@@ -5,11 +5,15 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from .models import User, Land
 from website import db
+
+import folium
+
 from copernicus_api.fetch_request import get_cdsapi_infos
+
 
 views = Blueprint("views", __name__)
 
-points = [] # dc l am initializat pe asta aici? 
+points = []  # dc l am initializat pe asta aici? 
 
 # @views.route('/api/v1/user_profile', methods=['GET'])
 # @jwt_required()
@@ -36,9 +40,36 @@ def get_user_profile():
         "username": user.username,
         "email": user.email,
         "number_of_lands": len(user.lands),
-        "lands" : [{'id': land.id, 'name':land.name, 'size': land.get_area_surface()} for land in user.lands]  
+        "lands": [{'id': land.id, 'name': land.name, 'size': land.get_area_surface()} for land in user.lands]  
     }
     return jsonify(user_profile), 200
+
+
+@views.route('/api/v1/update_username', methods=['POST'])
+@jwt_required()
+def update_username():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json()
+    new_username = data.get('username')
+
+    if not new_username:
+        return jsonify({'error': 'Username cannot be empty'}), 400
+
+    # Verifică dacă username-ul este deja folosit de un alt utilizator
+    if User.query.filter_by(username=new_username).first():
+        return jsonify({'error': 'Username already taken'}), 400
+
+    # Actualizează username-ul utilizatorului curent
+    user.username = new_username
+    db.session.commit()
+
+    return jsonify({'message': 'Username updated successfully', 'username': new_username}), 200
+
 
 @views.route("/api/v1/add_land", methods=["POST"])
 @jwt_required()
@@ -56,7 +87,7 @@ def add_land():
     
     print(points)
     print(name)
-    new_land = Land(name = name, user_id=current_user.id,
+    new_land = Land(name=name, user_id=current_user.id,
                     x1=points[0][0],
                                  y1=points[0][1],
                                  x2=points[1][0],
@@ -75,7 +106,6 @@ def add_land():
     db.session.add(new_land)
     db.session.commit()
     return jsonify({'message': 'Land added succesfully'}), 200
-
 
 
 @views.route("api/v1/get_coordinates", methods=["POST"])
@@ -99,6 +129,20 @@ def get_coordinates() -> dict:
     # print(response)
 
     return jsonify(response)
+  
+@views.route('/api/v1/user_lands', methods=['GET'])
+@jwt_required()
+def get_user_lands():
+    current_user_jwt = get_jwt_identity()
+    current_user = User.query.filter_by(email=current_user_jwt).first()
+    if current_user is None:
+        return jsonify({"message": "User not found"}), 404
+    
+    lands = [{'id': land.id, 'name': land.name} for land in current_user.lands]
+    return jsonify(lands), 200
+
+
+
 @views.route("/api/v1/analysis", methods=["GET", "POST"])
 @jwt_required()  # Asigură-te că utilizatorul este autentificat
 def analysis():
@@ -109,6 +153,7 @@ def analysis():
 
     if not user:
         return jsonify({'error': 'User not found'}), 404
+
 
     # Obținem toate terenurile asociate utilizatorului
     lands = Land.query.filter_by(user_id=user.id).all()
@@ -190,3 +235,4 @@ def get_fetch_dict(data) -> dict:
     }
 
     return fetch_dict
+
