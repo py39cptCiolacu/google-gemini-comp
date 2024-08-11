@@ -5,9 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from .models import User, Land
 from website import db
-from website import db
-
-import folium
+from copernicus_api.fetch_request import get_cdsapi_infos
 
 views = Blueprint("views", __name__)
 
@@ -101,56 +99,94 @@ def get_coordinates() -> dict:
     # print(response)
 
     return jsonify(response)
-
 @views.route("/api/v1/analysis", methods=["GET", "POST"])
-@jwt_required()
-def analysis() -> str:
-    data = request.get_json()
-    coords = data.get("points")
-    current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).first()
-    land = Land(user.id, coords)
+@jwt_required()  # Asigură-te că utilizatorul este autentificat
+def analysis():
+    current_user_email = get_jwt_identity()  # Obține ID-ul utilizatorului logat
 
-    parameters = request.form.getlist("parameters")
-    start_date = request.form.get("start_date")
-    end_date = request.form.get("end_date")
+    # Găsim utilizatorul logat după ID
+    user = User.query.filter_by(email=current_user_email).first()
 
-    prompt = f"UserID: {user.id}; LandID: {land.id}; Parameters: {', '.join(parameters)}; Start Date: {start_date}; End Date: {end_date}"
-    return prompt
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
+    # Obținem toate terenurile asociate utilizatorului
+    lands = Land.query.filter_by(user_id=user.id).all()
 
-# @views.route("/add_land")
-# def add_land():
+    # Extragem numele terenurilor
+    land_names = [land.name for land in lands]
 
-#     new_land_1 = Land(1, [1, 2, 3, 4])
-#     new_land_2 = Land(1, [1, 2, 3, 5])
+    if request.method == "POST":
+        data = request.json
 
-#     db.session.add(new_land_1)
-#     db.session.add(new_land_2)
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
 
-#     db.session.commit()
+        print("Received data:", data)
+        print("Parametrii: ", data["parameters"])
 
-#     return "<h1> ADDED </h1>"
+        fetch_dict = get_fetch_dict(data)
+        get_cdsapi_infos(fetch_dict)
 
-# @views.route("/test")
-# def test():
+        return jsonify({
+            'message': 'Data received successfully',
+            'received_data': data,
+            'land_names': land_names  # Adăugăm numele terenurilor în răspuns
+        })
 
-#     # test_fetch()
-#     # test_convertor()
-#     process_json("test_username_test_land_2024_08_07_00_22_45.json", "results.json")
+    elif request.method == "GET":
+        # Returnăm doar numele terenurilor dacă se face un GET
+        return jsonify({
+            'message': 'Lands retrieved successfully',
+            'land_names': land_names
+        })
+    
+@jwt_required
+def get_fetch_dict(data) -> dict:
 
-# #     return "<h1> ALL GOOD </h1"
+    current_user_email = get_jwt_identity()
+    current_user = User.query.filter_by(email=current_user_email).first()
 
+    current_land = Land.query.filter_by(user_id = current_user.id).filter_by(name = data["field"]).first() 
 
-# @views.route("/add_lands")
-# def add_lands():
+    parameters_map = {
+        'Temperature at 2 meters': "2m_temperature",
+        'Total Precipitation' : "total_precipitation",
+        'Soil Moisture (top layer)' : 'volumetric_soil_water_layer_1',
+        'Solar Radiation at the surface' : 'surface_solar_radiation_downwards',
+        'Relative Humidity' : '2m_dewpoint_temperature',
+        'Wind Speed (u component)' : '10m_u_component_of_wind',  
+        'Wind Speed (v component)' : '10m_v_component_of_wind',
+        'Soil Temperature at level 1' : 'soil_temperature_level_1'
+    }
 
-#     new_land_1 = Land("Land 1", 1, 12, 12, 44, 44, 55, 55, 66, 66)
-#     new_land_2 = Land("Land 2", 1, 13, 13, 23, 12, 12, 23, 12, 34)
+    parameters_lists = []
 
-#     db.session.add(new_land_1)
-#     db.session.add(new_land_2)
+    for param in data["parameters"]:
+        parameters_lists.append(parameters_map[param])
 
-#     db.session.commit()
+    year = data["start_date"][0:4]
+    month = data["start_date"][5:7]
 
-#     return "ALL GOOD"
+    start_day = data["start_date"][8:10]
+    end_day = data["end_date"][8:10]
+
+    int_start_day = int(start_day)
+    int_end_day = int(end_day)
+
+    days = []
+    while int_start_day <= int_end_day:
+        days.append(str(int_start_day))
+        int_start_day += 1
+
+    fetch_dict = {
+        "user" : current_user.id,
+        "land" : current_land.id,
+        "parameters": parameters_lists,
+        "year" : year,
+        "month": [month],
+        "day" : [days],
+        "area" : current_land.get_limits()
+    }
+
+    return fetch_dict
