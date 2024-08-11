@@ -8,6 +8,9 @@ from website import db
 
 import folium
 
+from copernicus_api.fetch_request import get_cdsapi_infos
+
+
 views = Blueprint("views", __name__)
 
 points = []  # dc l am initializat pe asta aici? 
@@ -126,7 +129,7 @@ def get_coordinates() -> dict:
     # print(response)
 
     return jsonify(response)
-
+  
 @views.route('/api/v1/user_lands', methods=['GET'])
 @jwt_required()
 def get_user_lands():
@@ -139,93 +142,97 @@ def get_user_lands():
     return jsonify(lands), 200
 
 
-# @views.route("/api/v1/analysis", methods=["GET", "POST"])
-# @jwt_required()
-# def analysis() -> str:
-#     data = request.get_json()
-#     coords = data.get("points")
-#     current_user = get_jwt_identity()
-#     user = User.query.filter_by(email=current_user).first()
-#     land = Land(user.id, coords)
 
-#     parameters = request.form.getlist("parameters")
-#     start_date = request.form.get("start_date")
-#     end_date = request.form.get("end_date")
-
-#     dict_prompt = { "user": f"{user.id}",
-#                    "parameters": [],
-#                    "year": "",
-#                    "month": [''],
-#                    "day": [''],
-#                    "area": land.get_limits()
-#                    }
-
-#     prompt = f"UserID: {user.id}; LandID: {land.id}; Parameters: {', '.join(parameters)}; Start Date: {start_date}; End Date: {end_date}"
-#     return dict_prompt
-
-@views.route('/api/v1/analysis', methods=['POST'])
-@jwt_required()
+@views.route("/api/v1/analysis", methods=["GET", "POST"])
+@jwt_required()  # Asigură-te că utilizatorul este autentificat
 def analysis():
-    data = request.json
-    params = data.get("parameters")
-    start_date = data.get("start_date")
-    end_date = data.get("end_date")
-    land_id = data.get("land_id")
-    current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).first()
+    current_user_email = get_jwt_identity()  # Obține ID-ul utilizatorului logat
+
+    # Găsim utilizatorul logat după ID
+    user = User.query.filter_by(email=current_user_email).first()
 
     if not user:
-        return jsonify({"message": "User not found"}), 404
+        return jsonify({'error': 'User not found'}), 404
 
-    land = Land.query.filter_by(id=land_id, user_id=user.id).first()
-    if not land:
-        return jsonify({"message": "Land not found"}), 404
 
-    dict_prompt = {
-        "user": f"{user.id}",
-        "land_id": f"{land.id}",
-        "parameters": params,
-        "start_date": start_date,
-        "end_date": end_date,
-        "area": land.get_limits()
+    # Obținem toate terenurile asociate utilizatorului
+    lands = Land.query.filter_by(user_id=user.id).all()
+
+    # Extragem numele terenurilor
+    land_names = [land.name for land in lands]
+
+    if request.method == "POST":
+        data = request.json
+
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        print("Received data:", data)
+        print("Parametrii: ", data["parameters"])
+
+        fetch_dict = get_fetch_dict(data)
+        get_cdsapi_infos(fetch_dict)
+
+        return jsonify({
+            'message': 'Data received successfully',
+            'received_data': data,
+            'land_names': land_names  # Adăugăm numele terenurilor în răspuns
+        })
+
+    elif request.method == "GET":
+        # Returnăm doar numele terenurilor dacă se face un GET
+        return jsonify({
+            'message': 'Lands retrieved successfully',
+            'land_names': land_names
+        })
+    
+@jwt_required
+def get_fetch_dict(data) -> dict:
+
+    current_user_email = get_jwt_identity()
+    current_user = User.query.filter_by(email=current_user_email).first()
+
+    current_land = Land.query.filter_by(user_id = current_user.id).filter_by(name = data["field"]).first() 
+
+    parameters_map = {
+        'Temperature at 2 meters': "2m_temperature",
+        'Total Precipitation' : "total_precipitation",
+        'Soil Moisture (top layer)' : 'volumetric_soil_water_layer_1',
+        'Solar Radiation at the surface' : 'surface_solar_radiation_downwards',
+        'Relative Humidity' : '2m_dewpoint_temperature',
+        'Wind Speed (u component)' : '10m_u_component_of_wind',  
+        'Wind Speed (v component)' : '10m_v_component_of_wind',
+        'Soil Temperature at level 1' : 'soil_temperature_level_1'
     }
 
-    # Process the analysis here and return the results
-    return jsonify(dict_prompt), 200
+    parameters_lists = []
 
+    for param in data["parameters"]:
+        parameters_lists.append(parameters_map[param])
 
-# @views.route("/add_land")
-# def add_land():
+    year = data["start_date"][0:4]
+    month = data["start_date"][5:7]
 
-#     new_land_1 = Land(1, [1, 2, 3, 4])
-#     new_land_2 = Land(1, [1, 2, 3, 5])
+    start_day = data["start_date"][8:10]
+    end_day = data["end_date"][8:10]
 
-#     db.session.add(new_land_1)
-#     db.session.add(new_land_2)
+    int_start_day = int(start_day)
+    int_end_day = int(end_day)
 
-#     db.session.commit()
+    days = []
+    while int_start_day <= int_end_day:
+        days.append(str(int_start_day))
+        int_start_day += 1
 
-#     return "<h1> ADDED </h1>"
+    fetch_dict = {
+        "user" : current_user.id,
+        "land" : current_land.id,
+        "parameters": parameters_lists,
+        "year" : year,
+        "month": [month],
+        "day" : [days],
+        "area" : current_land.get_limits()
+    }
 
-# @views.route("/test")
-# def test():
+    return fetch_dict
 
-#     # test_fetch()
-#     # test_convertor()
-#     process_json("test_username_test_land_2024_08_07_00_22_45.json", "results.json")
-
-# #     return "<h1> ALL GOOD </h1"
-
-
-# @views.route("/add_lands")
-# def add_lands():
-
-#     new_land_1 = Land("Land 1", 1, 12, 12, 44, 44, 55, 55, 66, 66)
-#     new_land_2 = Land("Land 2", 1, 13, 13, 23, 12, 12, 23, 12, 34)
-
-#     db.session.add(new_land_1)
-#     db.session.add(new_land_2)
-
-#     db.session.commit()
-
-#     return "ALL GOOD"

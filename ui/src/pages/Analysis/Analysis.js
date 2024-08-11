@@ -1,38 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Helmet } from 'react-helmet';
 
-const Analysis = () => {
+import { 
+    MDBCheckbox, 
+    MDBInput, 
+    MDBDropdown, 
+    MDBDropdownItem, 
+    MDBDropdownMenu, 
+    MDBDropdownToggle, 
+    MDBBtn, 
+    MDBContainer, 
+    MDBRow, 
+    MDBCol, 
+    MDBCard, 
+    MDBCardBody, 
+    MDBCardHeader 
+} from 'mdb-react-ui-kit';
+import { Helmet } from 'react-helmet'; // Import Helmet
+
+
+const FormComponent = () => {
     const [parameters, setParameters] = useState([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [selectedLand, setSelectedLand] = useState('');
-    const [lands, setLands] = useState([]);
+    const [fields, setFields] = useState([]);
+    const [crops, setCrops] = useState([]);
+    const [selectedField, setSelectedField] = useState('');
+    const [selectedCrop, setSelectedCrop] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showMessage, setShowMessage] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            navigate('/login');
-            return;
-        }
+    const cropsOptions = ['Wheat', 'Corn', 'Barley', 'Oats', 'Soybean', 'Rice', 'Canola', 'Cotton'];
+    const parameterOptions = [
+        'Temperature at 2 meters',
+        'Total Precipitation',
+        'Soil Moisture (top layer)',
+        'Solar Radiation at the surface',
+        'Relative Humidity',
+        'Wind Speed (u component)',
+        'Wind Speed (v component)',
+        'Soil Temperature at level 1',
+    ];
 
-        const fetchLands = async () => {
+    useEffect(() => {
+
+        const fetchFields = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/login');
+                return;
+            }
+
             try {
-                const response = await axios.get('http://127.0.0.1:5000/api/v1/user_lands', {
+                const response = await axios.get('http://localhost:5000/api/v1/analysis', {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
-                setLands(response.data);
+
+                setFields(response.data.land_names); // Setăm numele terenurilor primite de la API
+                setCrops(cropsOptions); // Setăm opțiunile pentru culturi
             } catch (error) {
-                console.error('There was an error fetching the lands!', error);
+                console.error('There was an error fetching the fields!', error);
             }
         };
 
-        fetchLands();
+        fetchFields();
     }, [navigate]);
 
     const handleCheckboxChange = (event) => {
@@ -48,36 +84,42 @@ const Analysis = () => {
         event.preventDefault();
         setError('');
 
+        if (!startDate || !endDate) {
+            setError('Please select both start date and end date.');
+            return;
+        }
+
         const start = new Date(startDate);
         const end = new Date(endDate);
-        const timeDiff = end - start;
-        const dayDiff = timeDiff / (1000 * 3600 * 24);
+        const differenceInDays = (end - start) / (1000 * 60 * 60 * 24);
 
-        if (dayDiff > 7) {
+        if (end < start) {
+            setError('End date cannot be before start date.');
+            return;
+        }
+
+        if (differenceInDays > 7) {
             setError('The date range cannot exceed 7 days.');
             return;
         }
 
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-            const day = ('0' + date.getDate()).slice(-2);
-            return { year, month, day };
-        };
-
-        const startFormatted = formatDate(start);
-        const endFormatted = formatDate(end);
+        setIsSubmitting(true);
+        setShowMessage(true);
 
         const data = {
             parameters: parameters,
-            start_date: `${startFormatted.year}-${startFormatted.month}-${startFormatted.day}`,
-            end_date: `${endFormatted.year}-${endFormatted.month}-${endFormatted.day}`,
-            land_id: selectedLand
+            start_date: startDate,
+            end_date: endDate,
+            field: selectedField,
+            crop: selectedCrop,
+
         };
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://127.0.0.1:5000/api/v1/analysis', data, {
+
+            const response = await axios.post('http://localhost:5000/api/v1/analysis', data, {
+
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
@@ -86,61 +128,99 @@ const Analysis = () => {
             console.log(response.data);
         } catch (error) {
             console.error('There was an error submitting the form!', error);
+        } finally {
+            setIsSubmitting(false);
+            setTimeout(() => {
+                setShowMessage(false);
+            }, 10000);
         }
     };
 
     return (
-        <>
-            <Helmet>
-                <title>Analysis Form - FieldMaster</title>
-            </Helmet>
-            <div style={{ paddingTop: '60px' }}>
-                <form onSubmit={handleSubmit}>
-                    <h2>Select Land</h2>
-                    <select value={selectedLand} onChange={(e) => setSelectedLand(e.target.value)} required>
-                        <option value="">Select a land</option>
-                        {lands.map(land => (
-                            <option key={land.id} value={land.id}>{land.name}</option>
-                        ))}
-                    </select><br />
+        <Helmet>
+            <title>Analysis Form - FieldMaster</title> {/* Set the page title */}
+        </Helmet>
+        <MDBContainer style={{ padding: '50px' }} className="my-4">
+            <MDBRow className="justify-content-center">
+                <MDBCol md="8">
+                    <MDBCard>
+                        <MDBCardHeader>
+                            <h4>Select Parameters for Analysis</h4>
+                        </MDBCardHeader>
+                        <MDBCardBody>
+                            <form onSubmit={handleSubmit}>
+                                <h5>Select Parameters</h5>
+                                <MDBRow>
+                                    {parameterOptions.map((param, index) => (
+                                        <MDBCol md="6" key={index}>
+                                            <MDBCheckbox
+                                                id={`checkbox${index}`}
+                                                label={param}
+                                                value={param}
+                                                onChange={handleCheckboxChange}
+                                            />
+                                        </MDBCol>
+                                    ))}
+                                </MDBRow>
 
-                    <h2>Select Parameters for Analysis</h2>
-                    <label>
-                        <input type="checkbox" name="parameters" value="2m_temperature" onChange={handleCheckboxChange} /> 2m Temperature
-                    </label><br />
-                    <label>
-                        <input type="checkbox" name="parameters" value="total_precipitation" onChange={handleCheckboxChange} /> Total Precipitation
-                    </label><br />
-                    <label>
-                        <input type="checkbox" name="parameters" value="volumetric_soil_water_layer_1" onChange={handleCheckboxChange} /> Volumetric Soil Water Layer 1
-                    </label><br />
-                    <label>
-                        <input type="checkbox" name="parameters" value="surface_solar_radiation_downwards" onChange={handleCheckboxChange} /> Surface Solar Radiation Downwards
-                    </label><br />
-                    <label>
-                        <input type="checkbox" name="parameters" value="2m_dewpoint_temperature" onChange={handleCheckboxChange} /> 2m Dewpoint Temperature
-                    </label><br />
-                    <label>
-                        <input type="checkbox" name="parameters" value="10m_u_component_of_wind" onChange={handleCheckboxChange} /> 10m U Component of Wind
-                    </label><br />
-                    <label>
-                        <input type="checkbox" name="parameters" value="10m_v_component_of_wind" onChange={handleCheckboxChange} /> 10m V Component of Wind
-                    </label><br />
-                    <label>
-                        <input type="checkbox" name="parameters" value="soil_temperature_level_1" onChange={handleCheckboxChange} /> Soil Temperature Level 1
-                    </label><br />
+                                <h5 className="mt-4">Select Date Range</h5>
+                                <MDBInput
+                                    type="date"
+                                    label="Start Date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                />
+                                <MDBInput
+                                    type="date"
+                                    label="End Date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                />
 
-                    <h2>Select Date Range</h2>
-                    <label htmlFor="start_date">Start Date:</label>
-                    <input type="date" id="start_date" name="start_date" value={startDate} onChange={(e) => setStartDate(e.target.value)} /><br />
-                    <label htmlFor="end_date">End Date:</label>
-                    <input type="date" id="end_date" name="end_date" value={endDate} onChange={(e) => setEndDate(e.target.value)} /><br />
+                                <h5 className="mt-4">Select Field</h5>
+                                <MDBDropdown className="mb-4">
+                                    <MDBDropdownToggle color="secondary">
+                                        {selectedField || 'Select Field'}
+                                    </MDBDropdownToggle>
+                                    <MDBDropdownMenu>
+                                        {fields.map((field, index) => (
+                                            <MDBDropdownItem key={index} onClick={() => setSelectedField(field)}>
+                                                {field}
+                                            </MDBDropdownItem>
+                                        ))}
+                                    </MDBDropdownMenu>
+                                </MDBDropdown>
 
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <input type="submit" value="Submit" />
-                </form>
-            </div>
-        </>
+                                <h5 className="mt-4">Select Crop</h5>
+                                <MDBDropdown className="mb-4">
+                                    <MDBDropdownToggle color="secondary">
+                                        {selectedCrop || 'Select Crop'}
+                                    </MDBDropdownToggle>
+                                    <MDBDropdownMenu>
+                                        {crops.map((crop, index) => (
+                                            <MDBDropdownItem key={index} onClick={() => setSelectedCrop(crop)}>
+                                                {crop}
+                                            </MDBDropdownItem>
+                                        ))}
+                                    </MDBDropdownMenu>
+                                </MDBDropdown>
+
+                                <MDBBtn type="submit" color="primary" className="mt-4">Submit</MDBBtn>
+                            </form>
+
+                            {error && (
+                                <p className="mt-3 text-danger text-center">{error}</p>
+                            )}
+
+                            {showMessage && !error && (
+                                <p className="mt-3 text-center">Wait for your response...</p>
+                            )}
+                        </MDBCardBody>
+                    </MDBCard>
+                </MDBCol>
+            </MDBRow>
+        </MDBContainer>
+
     );
 };
 
