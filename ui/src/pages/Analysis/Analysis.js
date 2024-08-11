@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
 import { 
     MDBCheckbox, 
     MDBInput, 
@@ -16,6 +17,8 @@ import {
     MDBCardBody, 
     MDBCardHeader 
 } from 'mdb-react-ui-kit';
+import { Helmet } from 'react-helmet'; // Import Helmet
+
 
 const FormComponent = () => {
     const [parameters, setParameters] = useState([]);
@@ -130,6 +133,9 @@ const FormComponent = () => {
     };
 
     return (
+        <Helmet>
+            <title>Analysis Form - FieldMaster</title> {/* Set the page title */}
+        </Helmet>
         <MDBContainer style={{ padding: '50px' }} className="my-4">
             <MDBRow className="justify-content-center">
                 <MDBCol md="8">

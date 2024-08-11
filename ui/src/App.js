@@ -14,6 +14,7 @@ import LandingPage from './components/LandingPage';
 
 
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
+import { Helmet } from 'react-helmet';
 
 function App() {
   const [username, setUsername] = useState('');
@@ -76,6 +77,9 @@ function PrivateRoute({ children }) {
 function Home() {
   return (
     <div>
+      <Helmet>
+      <title>Home - FieldMaster</title>
+      </Helmet>
       <LandingPage />
     </div>
   );

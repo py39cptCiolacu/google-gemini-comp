@@ -39,3 +39,9 @@ Efectul de lumină
     position: relative;
     z-index: 1;
 }
+
+.logo-image {
+    height: 40px; /* Înălțimea logo-ului, ajustează după nevoie */
+    margin-right: 10px; /* Spațiu între logo și text */
+    vertical-align: middle; /* Alinierea verticală a logo-ului */
+}
