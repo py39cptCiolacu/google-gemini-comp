@@ -1,7 +1,10 @@
 import cdsapi
 from website.models import User, Land
 from .nc_to_json import nc_to_json_convertor, process_json
+from ai.prompt import generate_weather_prompt_v2
+from ai.get_response import generate_response
 from datetime import datetime
+import json
 
 c = cdsapi.Client()
 
@@ -52,7 +55,7 @@ def check_fetch_infos(dict_infos: dict) -> dict | None:
     return dict_infos
 
 
-def get_cdsapi_infos(dict_infos: dict) -> None:
+def get_cdsapi_infos(dict_infos: dict) -> str:
 
     checked_infos = check_fetch_infos(dict_infos)
 
@@ -85,7 +88,13 @@ def get_cdsapi_infos(dict_infos: dict) -> None:
     nc_to_json_convertor(file_name)
     process_json(input_json=f"{file_name}.json", output_json=f"{file_name}_final.json")
     
+    with open(f"{file_name}_final.json", 'r') as file:
+        infos = json.load(file)
+
+    prompt = generate_weather_prompt_v2(infos)
+    print(prompt)
+    result = generate_response(prompt)
 
     print("All good")
     
-
+    return result

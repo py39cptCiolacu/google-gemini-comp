@@ -102,7 +102,7 @@ def process_json(input_json, output_json):
     with open(output_json, 'w') as file:
         json.dump(final_result, file, indent=4)
 
-    os.remove(f"{input_json}.json")
+    # os.remove(f"{input_json}.json")
 
 
 

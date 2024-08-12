@@ -7,9 +7,11 @@ from .models import User, Land
 from website import db
 
 import folium
+import json
+import os
 
 from copernicus_api.fetch_request import get_cdsapi_infos
-
+from ai.prompt import generate_weather_prompt_v2
 
 views = Blueprint("views", __name__)
 
@@ -171,21 +173,13 @@ def analysis():
         print("Parametrii: ", data["parameters"])
 
         fetch_dict = get_fetch_dict(data)
-        get_cdsapi_infos(fetch_dict)
-
-        # print("---------fetch data")
-        # print(fetch_dict)
-        # try:
-        #     get_cdsapi_infos(fetch_dict)
-        # except Exception as e:
-        #     print(str(e))
-        #     if "memory" in str(e):
-        #         print("-------------MEMORY ERROR-----------")
-
+        response = get_cdsapi_infos(fetch_dict)
+    
         return jsonify({
             'message': 'Data received successfully',
             'received_data': data,
-            'land_names': land_names  # Adăugăm numele terenurilor în răspuns
+            'land_names': land_names,  # Adăugăm numele terenurilor în răspuns
+            'cdsapi_infos' : response
         })
 
     elif request.method == "GET":
@@ -253,3 +247,16 @@ def get_fetch_dict(data) -> dict:
 
     return fetch_dict
 
+
+@views.route("/test")
+def test_promt():
+
+    JSON_FILE_NAME = "daniel1234_test_land_2024_08_11_22_24_06_final.json"
+    print(os.getcwd())
+    with open(JSON_FILE_NAME, 'r') as file:
+        weather_data = json.load(file)
+
+    prompts = generate_weather_prompt_v2(weather_data)
+    print(prompts)
+
+    return "<h1> ALL GOOD </h1>"

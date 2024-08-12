@@ -19,7 +19,6 @@ import {
 } from 'mdb-react-ui-kit';
 import { Helmet } from 'react-helmet'; // Import Helmet
 
-
 const Analysis = () => {
     const [parameters, setParameters] = useState([]);
     const [startDate, setStartDate] = useState('');
@@ -31,6 +30,7 @@ const Analysis = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showMessage, setShowMessage] = useState(false);
     const [error, setError] = useState('');
+    const [cdsapiInfos, setCdsapiInfos] = useState(''); // Adaugă state pentru cdsapi_infos
     const navigate = useNavigate();
 
     const cropsOptions = ['Wheat', 'Corn', 'Barley', 'Oats', 'Soybean', 'Rice', 'Canola', 'Cotton'];
@@ -46,7 +46,6 @@ const Analysis = () => {
     ];
 
     useEffect(() => {
-
         const fetchFields = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -112,20 +111,23 @@ const Analysis = () => {
             end_date: endDate,
             field: selectedField,
             crop: selectedCrop,
-
         };
 
         try {
             const token = localStorage.getItem('token');
 
             const response = await axios.post('http://localhost:5000/api/v1/analysis', data, {
-
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
             });
+
             console.log(response.data);
+
+            // Setăm cdsapi_infos în state
+            setCdsapiInfos(response.data.cdsapi_infos);
+
         } catch (error) {
             console.error('There was an error submitting the form!', error);
         } finally {
@@ -137,9 +139,11 @@ const Analysis = () => {
     };
 
     return (
-        <><></><Helmet>
-            <title>Analysis Form - FieldMaster</title> {/* Set the page title */}
-        </Helmet><MDBContainer style={{ padding: '50px' }} className="my-4">
+        <>
+            <Helmet>
+                <title>Analysis Form - FieldMaster</title> {/* Set the page title */}
+            </Helmet>
+            <MDBContainer style={{ padding: '50px' }} className="my-4">
                 <MDBRow className="justify-content-center">
                     <MDBCol md="8">
                         <MDBCard>
@@ -211,12 +215,19 @@ const Analysis = () => {
                                 {showMessage && !error && (
                                     <p className="mt-3 text-center">Wait for your response...</p>
                                 )}
+
+                                {/* Afișăm alertă cu cdsapi_infos */}
+                                {cdsapiInfos && (
+                                    <div className="alert alert-info mt-4">
+                                        {JSON.stringify(cdsapiInfos, null, 2)}
+                                    </div>
+                                )}
                             </MDBCardBody>
                         </MDBCard>
                     </MDBCol>
                 </MDBRow>
-            </MDBContainer></>
-
+            </MDBContainer>
+        </>
     );
 };
 
